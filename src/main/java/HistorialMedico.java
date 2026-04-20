@@ -26,7 +26,7 @@ public class HistorialMedico{
 	}
 	
 	public void setIdHistorial(int idHistorial){
-		this.idHistorial=historial;
+		this.idHistorial=idHistorial;
 	}
 	
 	
@@ -42,7 +42,7 @@ public class HistorialMedico{
 		return paciente;
 	}
 	
-	public void setPaciente(String paciente){
+	public void setPaciente(Paciente paciente){
 		this.paciente=paciente;
 	}
 	

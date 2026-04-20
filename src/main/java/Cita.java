@@ -1,12 +1,12 @@
 import java.util.Date;
-import java.time.LocaTime;
+import java.time.LocalTime;
 
 public class Cita{
 	
 	private int idCita;
 	private Date fechaCita;
-	private LocaTime horaInicio;
-	private LocaTime horaFin;
+	private LocalTime horaInicio;
+	private LocalTime horaFin;
 	private Paciente paciente;
 	private Doctor doctor;
 	private String estadoCita;
@@ -14,7 +14,7 @@ public class Cita{
 	//private double costoCita;
 	
 	
-	public Cita(int idCita, Date fechaCita, LocaTime horaInicio,LocaTime horaFin,Paciente paciente,
+	public Cita(int idCita, Date fechaCita, LocalTime horaInicio,LocalTime horaFin,Paciente paciente,
 			Doctor doctor, String estadoCita){
 				
 		this.idCita=idCita;
@@ -47,7 +47,7 @@ public class Cita{
 		this.fechaCita=fechaCita;
 	}
 	
-	public Date getHoraInicio(){
+	public LocalTime getHoraInicio(){
 		return horaInicio;
 	}
 	

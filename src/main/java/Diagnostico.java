@@ -13,7 +13,7 @@ public class Diagnostico{
         this.descripcion=descripcion;
         this.gravedad=gravedad;
         this.fechaDiagnostico=fechaDiagnostico;
-        this.cita=cita;
+//        this.cita=cita;
     }
 
     public int getIdDiagnostico() {
@@ -48,13 +48,13 @@ public class Diagnostico{
         this.fechaDiagnostico = fechaDiagnostico;
     }
 
-    public Cita getCita() {
-        return cita;
-    }
-
-    public void setCita(Cita cita) {
-        this.cita = cita;
-    }
+//    public Cita getCita() {
+//        return cita;
+//    }
+//
+//    public void setCita(Cita cita) {
+//        this.cita = cita;
+//    }
 	
 	public void agregarDescripcion(){
 		

@@ -12,7 +12,7 @@ public class Detalle{
 	
 	public Detalle(int idDetalle, Cita cita){
 		
-		this.detalle;
+//		this.detalle;
 		this.cita=cita;
 		this.listaDiagnosticos=new ArrayList<>();
 		this.listaTratamientos=new ArrayList<>();
@@ -41,9 +41,9 @@ public class Detalle{
 		return new ArrayList<>(listaDiagnosticos);//nueva lista llenado con listaDiagnosticos
 	}
 	
-	public void setListaDiagnosticos(List<Diagnostico>(listaDiagnosticos){
-		this.listaDiagnosticos=new ArrayList<>(listaDiagnosticos);
-	}
+//	public void setListaDiagnosticos(List<Diagnostico>(listaDiagnosticos){
+//		this.listaDiagnosticos=new ArrayList<>(listaDiagnosticos);
+//	}
 	
 	
 	public List<Tratamiento> getListaTratamientos(){

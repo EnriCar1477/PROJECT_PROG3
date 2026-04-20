@@ -6,9 +6,9 @@ public class Doctor extends Persona{
 	
 	public Doctor(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,String telefono,String correo,
 					String especialidad, Date fechaIngreso){
-		super(id,nombres,apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo);
+		super(dni,nombres,apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo);
 		this.especialidad=especialidad;
-		this.fechaIngreso=fechaIngreso
+		this.fechaIngreso=fechaIngreso;
 	}
 	
 	public String getEspecialidad() {

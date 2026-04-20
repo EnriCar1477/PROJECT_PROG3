@@ -7,7 +7,7 @@ public class Paciente extends Persona{
 	
 	public Paciente(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,String telefono,String correo,
 					String estado, boolean tieneSeguro){
-		super(id,nombres,apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo);
+		super(dni,nombres,apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo);
 		this.estado=estado;
 		this.tieneSeguro=tieneSeguro;
 	

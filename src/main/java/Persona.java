@@ -1,4 +1,4 @@
-import java.util.Date
+import java.util.Date;
 
 public class Persona{
 	private String dni; // El id lo tiene tanto paciente, médico y secretario/a
@@ -20,7 +20,7 @@ public class Persona{
 	}
 	
 	public String getDni() {
-        return id;
+        return dni;
     }
 
     public void setDni(String dni) {
