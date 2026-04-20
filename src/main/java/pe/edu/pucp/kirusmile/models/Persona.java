@@ -1,3 +1,5 @@
+package pe.edu.pucp.kirusmile.models;
+
 import java.util.Date;
 
 public class Persona{

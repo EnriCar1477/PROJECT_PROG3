@@ -1,3 +1,7 @@
+package pe.edu.pucp.kirusmile.dao;
+
+import pe.edu.pucp.kirusmile.models.HistorialMedico;
+
 import java.util.List;
 import java.util.ArrayList;
 

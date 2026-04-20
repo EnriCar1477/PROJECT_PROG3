@@ -1,3 +1,5 @@
+package pe.edu.pucp.kirusmile.models;
+
 import java.util.Date;
 
 public class Diagnostico{
@@ -48,11 +50,11 @@ public class Diagnostico{
         this.fechaDiagnostico = fechaDiagnostico;
     }
 
-//    public Cita getCita() {
+//    public pe.edu.pucp.kirusmile.models.Cita getCita() {
 //        return cita;
 //    }
 //
-//    public void setCita(Cita cita) {
+//    public void setCita(pe.edu.pucp.kirusmile.models.Cita cita) {
 //        this.cita = cita;
 //    }
 	

@@ -1,3 +1,5 @@
+package pe.edu.pucp.kirusmile.models;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -64,7 +66,7 @@ public class HistorialMedico{
 	//Agregué algunos más
 	
 	/*
-	public void agregarDiagnostico(Diagnostico diagnostico){
+	public void agregarDiagnostico(pe.edu.pucp.kirusmile.models.Diagnostico diagnostico){
 		// listaDiagnosticos.add(diagnostico);
 	}
 	

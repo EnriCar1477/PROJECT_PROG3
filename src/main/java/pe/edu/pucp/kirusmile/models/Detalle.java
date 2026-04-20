@@ -1,3 +1,5 @@
+package pe.edu.pucp.kirusmile.models;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -41,7 +43,7 @@ public class Detalle{
 		return new ArrayList<>(listaDiagnosticos);//nueva lista llenado con listaDiagnosticos
 	}
 	
-//	public void setListaDiagnosticos(List<Diagnostico>(listaDiagnosticos){
+//	public void setListaDiagnosticos(List<pe.edu.pucp.kirusmile.models.Diagnostico>(listaDiagnosticos){
 //		this.listaDiagnosticos=new ArrayList<>(listaDiagnosticos);
 //	}
 	
