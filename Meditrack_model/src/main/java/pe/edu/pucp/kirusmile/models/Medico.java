@@ -4,24 +4,44 @@ import java.util.Date;
 import java.util.List;
 
 public class Medico extends Persona{
+	private int id;
 	private String cmp;
 	private String rne;
 	private Especialidad especialidad;
 	private Date fechaIngreso;
 	private String firmaDigital;
 	private List<HorarioDisponibilidad> listaHorarios;
+	private boolean desactivado;
 
 
 	public Medico(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
-				  String telefono, String correo, String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
-				  String firmaDigital, List<HorarioDisponibilidad> listaHorarios) {
+				  String telefono, String correo,int id, String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
+				  String firmaDigital, List<HorarioDisponibilidad> listaHorarios,boolean desactivado) {
 		super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo);
+		this.id=id;
 		this.cmp = cmp;
 		this.rne = rne;
 		this.especialidad = especialidad;
 		this.fechaIngreso = fechaIngreso;
 		this.firmaDigital = firmaDigital;
 		this.listaHorarios = listaHorarios;
+		this.desactivado=desactivado;
+	}
+
+	public boolean getDesactivado() {
+		return desactivado;
+	}
+
+	public void setDesactivado(boolean desactivado) {
+		this.desactivado = desactivado;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getCmp() {
