@@ -3,55 +3,32 @@ package pe.edu.pucp.kirusmile.models;
 import java.util.Date;
 
 public class Tratamiento{//TRATAMIENTO
-	private int id;
-	private String nombreMedicamento;
-	private String dosis;
-	private String frecuencia;
-	private Date fechaInicio;
-	private Date fechaFin;
-	// O puede ser, en vez de fecha inicio y fin, periodo o intervalo de tiempo
-	private int idCita; // y cómo se explica esto? xd
-	
-	public Tratamiento(int id,String nombreMedicamento,String dosis,String frecuencia,Date fechaInicio,Date fechaFin,int idCita) {
-        this.id=id;
-        this.nombreMedicamento=nombreMedicamento;
-        this.dosis=dosis;
-        this.frecuencia=frecuencia;
-        this.fechaInicio=fechaInicio;
-        this.fechaFin=fechaFin;
-        this.idCita=idCita;
+    private TipoTratamiento tipo;
+    private String indicaciones;
+    private Date fechaInicio;
+    private Date fechaFin;
+
+    public Tratamiento(TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin) {
+        this.tipo = tipo;
+        this.indicaciones = indicaciones;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
     }
 
-    public int getId() {
-        return id;
+    public TipoTratamiento getTipo() {
+        return tipo;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTipo(TipoTratamiento tipo) {
+        this.tipo = tipo;
     }
 
-    public String getNombreMedicamento() {
-        return nombreMedicamento;
+    public String getIndicaciones() {
+        return indicaciones;
     }
 
-    public void setNombreMedicamento(String nombreMedicamento) {
-        this.nombreMedicamento = nombreMedicamento;
-    }
-
-    public String getDosis() {
-        return dosis;
-    }
-
-    public void setDosis(String dosis) {
-        this.dosis = dosis;
-    }
-
-    public String getFrecuencia() {
-        return frecuencia;
-    }
-
-    public void setFrecuencia(String frecuencia) {
-        this.frecuencia = frecuencia;
+    public void setIndicaciones(String indicaciones) {
+        this.indicaciones = indicaciones;
     }
 
     public Date getFechaInicio() {
@@ -69,20 +46,4 @@ public class Tratamiento{//TRATAMIENTO
     public void setFechaFin(Date fechaFin) {
         this.fechaFin = fechaFin;
     }
-
-    public int getIdCita() {
-        return idCita;
-    }
-
-    public void setIdCita(int idCita) {
-        this.idCita = idCita;
-    }
-	
-	void emitirTratamiento(){ // iría realmente esto aquí?
-		
-	}
-	
-	void refillPrescription(){ // Esto qué es?
-		
-	}
 }
