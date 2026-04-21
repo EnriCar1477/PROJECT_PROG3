@@ -1,118 +1,111 @@
 package pe.edu.pucp.kirusmile.models;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.time.LocalTime;
 
 public class CitaMedica {
 
-    // --- ATRIBUTOS ---
     private int idCita;
-    private LocalDate fecha;
+    private Date fechaCita;
     private LocalTime horaInicio;
     private LocalTime horaFin;
-    private EstadoCita estado; // Enum: PROGRAMADA, ATENDIDA, CANCELADA, PENDIENTE_PAGO
     private Paciente paciente;
-    private Medico medicoAsignado;
-    private DetalleHistorial detalle;
-    private Pago pago;
+    private Medico medico;
+    private String estadoCita;
+    private boolean desactivado;
 
-    // --- GETTERS Y SETTERS INTERCALADOS ---
+    //private double costoCita;
 
-    public int getIdCita() {
+
+    public CitaMedica(int idCita, Date fechaCita, LocalTime horaInicio, LocalTime horaFin, Paciente paciente,
+                      Medico medico, String estadoCita,boolean desactivado){
+
+        this.idCita=idCita;
+        this.fechaCita=fechaCita;
+        this.horaInicio=horaInicio;
+        this.horaFin=horaFin;
+        this.paciente=paciente;
+        this.medico = medico;
+        this.estadoCita=estadoCita;
+        this.desactivado=desactivado;
+
+    }
+
+
+    //getter y setter
+
+    public int getIdCita(){
         return idCita;
     }
-    public void setIdCita(int idCita) {
-        this.idCita = idCita;
+
+    public void getIdCita(int idCita){
+        this.idCita=idCita;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
-    }
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
+
+    public Date getFechaCita(){
+        return fechaCita;
     }
 
-    public LocalTime getHoraInicio() {
+    public void setFechaCita(Date fechaCita){
+        this.fechaCita=fechaCita;
+    }
+
+    public LocalTime getHoraInicio(){
         return horaInicio;
     }
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
+
+    public void setHoraInicio(LocalTime horaInicio){
+        this.horaInicio=horaInicio;
     }
 
-    public LocalTime getHoraFin() {
+    public LocalTime getHoraFin(){
         return horaFin;
     }
-    public void setHoraFin(LocalTime horaFin) {
-        this.horaFin = horaFin;
+
+    public void setHoraFin(LocalTime horaFin){
+        this.horaFin=horaFin;
     }
 
-    public EstadoCita getEstado() {
-        return estado;
-    }
-    public void setEstado(EstadoCita estado) {
-        this.estado = estado;
+    public Paciente getPaciente(){
+        return paciente;
     }
 
-    public Paciente getPaciente() { return paciente; }
-    public void setPaciente(Paciente paciente) { this.paciente = paciente; }
-
-    public Medico getMedicoAsignado() {
-        return medicoAsignado;
-    }
-    public void setMedicoAsignado(Medico medicoAsignado) {
-        this.medicoAsignado = medicoAsignado;
+    public void setPaciente(Paciente paciente){
+        this.paciente=paciente;
     }
 
-    public DetalleHistorial getDetalle() {
-        return detalle;
-    }
-    public void setDetalle(DetalleHistorial detalle) {
-        this.detalle = detalle;
+    public Medico getDoctor(){
+        return medico;
     }
 
-    public Pago getPago() {
-        return pago;
-    }
-    public void setPago(Pago pago) {
-        this.pago = pago;
+    public void setDoctor(Medico medico){
+        this.medico = medico;
     }
 
-    // --- CONSTRUCTORES ---
-
-    public CitaMedica() {
-        this.estado = EstadoCita.PENDIENTE_PAGO; // Estado inicial sugerido
+    public String getEstadoCita(){
+        return estadoCita;
     }
 
-    public CitaMedica(int idCita, LocalDate fecha, LocalTime horaInicio, Medico medicoAsignado) {
-        this.idCita = idCita;
-        this.fecha = fecha;
-        this.horaInicio = horaInicio;
-        this.medicoAsignado = medicoAsignado;
-        this.estado = EstadoCita.PROGRAMADA;
-        // La hora fin se podría calcular automáticamente sumando 20 o 30 min
-        this.horaFin = horaInicio.plusMinutes(30); 
+    public void setEstadoCita(String estadoCita){
+        this.estadoCita=estadoCita;
     }
 
-    // --- MÉTODOS ---
-
-    public void cambiarEstado(EstadoCita nuevoEstado) {
-        if (this.estado == EstadoCita.ATENDIDA && nuevoEstado == EstadoCita.CANCELADA) {
-            throw new IllegalStateException("No se puede cancelar una cita que ya ha sido atendida.");
-        }
-        this.estado = nuevoEstado;
-        System.out.println("Cita N° " + idCita + " cambió su estado a: " + nuevoEstado);
+    public boolean getDesactivado() {
+        return desactivado;
     }
 
-    public double obtenerCostoAtencion() {
-        if (medicoAsignado != null && medicoAsignado.getEspecialidad() != null) {
-            // El precio estándar está definido en la clase Especialidad
-            return medicoAsignado.getEspecialidad().getCostoEspecialidad();
-        }
-        return 0.0;
+    public void setDesactivado(boolean desactivado) {
+        this.desactivado = desactivado;
     }
 
-    public void finalizarCita(DetalleHistorial detalleFinalizado) {
-        this.detalle = detalleFinalizado;
-        this.cambiarEstado(EstadoCita.ATENDIDA);
+    //metodos
+    public void actualizarEstado(){
+
     }
+    public void mostrarCita(){
+
+    }
+
+
 }
