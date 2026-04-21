@@ -1,8 +1,11 @@
 package pe.edu.pucp.kirusmile.models;
 
 import java.util.Date;
+import java.util.Calendar;
 
-public class Persona{
+public class Persona {
+
+    // --- ATRIBUTOS ---
     private String dni;
     private String nombres;
     private String apellidoPaterno;
@@ -11,15 +14,7 @@ public class Persona{
     private String telefono;
     private String correo;
 
-    public Persona(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,String telefono,String correo){
-        this.dni=dni;
-        this.nombres=nombres;
-        this.apellidoPaterno=apellidoPaterno;
-        this.apellidoMaterno=apellidoMaterno;
-        this.fechaNacimiento=fechaNacimiento;
-        this.telefono=telefono;
-        this.correo=correo;
-    }
+    // --- GETTERS Y SETTERS INTERCALADOS ---
 
     public String getDni() {
         return dni;
@@ -36,7 +31,6 @@ public class Persona{
     public void setNombres(String nombres) {
         this.nombres = nombres;
     }
-
 
     public String getApellidoPaterno() {
         return apellidoPaterno;
@@ -78,13 +72,50 @@ public class Persona{
         this.correo = correo;
     }
 
-    public void actualizarInformacion(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,String telefono,String correo){
+    // --- CONSTRUCTORES ---
 
+    public Persona() {
+        // Constructor vacío
     }
 
-    public void mostrarDatos(){
-
-
+    public Persona(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento, String telefono, String correo) {
+        this.dni = dni;
+        this.nombres = nombres;
+        this.apellidoPaterno = apellidoPaterno;
+        this.apellidoMaterno = apellidoMaterno;
+        this.fechaNacimiento = fechaNacimiento;
+        this.telefono = telefono;
+        this.correo = correo;
     }
 
+    // --- MÉTODOS ---
+
+    /**
+     * Retorna el nombre completo concatenando los tres campos de nombre.
+     */
+    public String obtenerNombreCompleto() {
+        return this.nombres + " " + this.apellidoPaterno + " " + this.apellidoMaterno;
+    }
+
+    /**
+     * Método de utilidad para calcular la edad actual basada en la fecha de nacimiento.
+     */
+    public int calcularEdad() {
+        if (this.fechaNacimiento == null) return 0;
+
+        Calendar hoy = Calendar.getInstance();
+        Calendar nacimiento = Calendar.getInstance();
+        nacimiento.setTime(this.fechaNacimiento);
+
+        int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
+        if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
+            edad--;
+        }
+        return edad;
+    }
+
+    public boolean validarDni() {
+        // Lógica básica para verificar que el DNI tenga 8 dígitos
+        return this.dni != null && this.dni.length() == 8;
+    }
 }
