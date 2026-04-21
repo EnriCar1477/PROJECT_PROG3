@@ -1,19 +1,26 @@
 package pe.edu.pucp.kirusmile.dao.impl;
 
-public class CiaDAOImpl {
+public class PacienteDAOImpl {
    @Override
-    public Cita load(Integer id) {
-        String sql = "select id_area, nombre, activa from area where id = ?";
+    public Paciente load(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,String telefono,String correo,
+					String estado, boolean tieneSeguro) {
+        String sql = "select id_cita, activa from area where id = ?";
         try(Connection connection = Meditrack_DBManager.getInstance().getConnection();
             PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
+            pstmt.setString(1, dni);
+            pstmt.setString(2, nombres);
+            pstmt.setString(3, apellidoPaterno);
+            pstmt.setString(4, apellidoMaterno);
+            pstmt.setDate(5, fechaNacimiento);
+            pstmt.setString(6, telefono);
+            pstmt.setString(7, correo);
+            pstmt.setString(8, estado);
+            pstmt.setBoolean(9, tieneSeguro);
+
             try(ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    Area area = new Area();
-                    area.setId(rs.getInt(1));
-                    area.setName(rs.getString(2));
-                    area.setActive(rs.getBoolean(3));
-                    return area;
+                    Paciente paciente = new Paciente(1,2,3,4,5,6,7,8,9);
+                    return paciente;
                 }
             }
         } catch (SQLException e) {
@@ -23,7 +30,7 @@ public class CiaDAOImpl {
     }
 
     @Override
-    public Cita save(Area area) {
+    public Paciente save(Paciente paciente) {
         area.setActive(true);
         String sql = "insert into area (nombre, activa) values (?, ?)";
         try(Connection connection = DBManager.getInstance().getConnection();
