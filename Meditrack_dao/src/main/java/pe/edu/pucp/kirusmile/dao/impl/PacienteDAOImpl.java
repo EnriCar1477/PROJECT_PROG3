@@ -13,9 +13,8 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public Paciente load(String dni) {
-        String sql = "SELECT dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, estado, tieneSeguro FROM Paciente WHERE dni = ?";
+        String sql = "SELECT dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, grupoSanguineo, factorRh, gradoInstruccion, ocupacion, etnia FROM Paciente WHERE dni = ?";
         
-        // Uso de try-with-resources para garantizar el cierre
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
              
@@ -23,7 +22,6 @@ public class PacienteDAOImpl implements PacienteDAO {
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    // Accediendo a través de índices numéricos de izquierda a derecha
                     Paciente paciente = new Paciente(
                             rs.getString(1),  // dni
                             rs.getString(2),  // nombres
@@ -32,8 +30,11 @@ public class PacienteDAOImpl implements PacienteDAO {
                             rs.getDate(5),    // fechaNacimiento
                             rs.getString(6),  // telefono
                             rs.getString(7),  // correo
-                            rs.getString(8),  // estado
-                            rs.getBoolean(9)  // tieneSeguro
+                            rs.getString(8),  // grupoSanguineo
+                            rs.getString(9),  // factorRh
+                            rs.getString(10), // gradoInstruccion
+                            rs.getString(11), // ocupacion
+                            rs.getString(12)  // etnia
                     );
                     return paciente;
                 }
@@ -46,8 +47,8 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public Paciente save(Paciente t) {
-        String sql = "INSERT INTO Paciente (dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, estado, tieneSeguro) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Paciente (dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, grupoSanguineo, factorRh, gradoInstruccion, ocupacion, etnia) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                      
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -56,18 +57,15 @@ public class PacienteDAOImpl implements PacienteDAO {
             ps.setString(2, t.getNombres());
             ps.setString(3, t.getApellidoPaterno());
             ps.setString(4, t.getApellidoMaterno());
-            
-            // Convertimos java.util.Date a java.sql.Date
-            if (t.getFechaNacimiento() != null) {
-                ps.setDate(5, new java.sql.Date(t.getFechaNacimiento().getTime()));
-            } else {
-                ps.setNull(5, java.sql.Types.DATE);
-            }
-            
+            if (t.getFechaNacimiento() != null) ps.setDate(5, new java.sql.Date(t.getFechaNacimiento().getTime()));
+            else ps.setNull(5, java.sql.Types.DATE);
             ps.setString(6, t.getTelefono());
             ps.setString(7, t.getCorreo());
-            ps.setString(8, t.getEstado());
-            ps.setBoolean(9, t.getTieneSeguro());
+            ps.setString(8, t.getGrupoSanguineo());
+            ps.setString(9, t.getFactorRh());
+            ps.setString(10, t.getGradoInstruccion());
+            ps.setString(11, t.getOcupacion());
+            ps.setString(12, t.getEtnia());
             
             ps.executeUpdate();
             return t; 
@@ -80,7 +78,7 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public Paciente update(Paciente t) {
-        String sql = "UPDATE Paciente SET nombres = ?, apellidoPaterno = ?, apellidoMaterno = ?, fechaNacimiento = ?, telefono = ?, correo = ?, estado = ?, tieneSeguro = ? " +
+        String sql = "UPDATE Paciente SET nombres = ?, apellidoPaterno = ?, apellidoMaterno = ?, fechaNacimiento = ?, telefono = ?, correo = ?, grupoSanguineo = ?, factorRh = ?, gradoInstruccion = ?, ocupacion = ?, etnia = ? " +
                      "WHERE dni = ?";
                      
         try (Connection con = DBManager.getInstance().getConnection();
@@ -89,20 +87,17 @@ public class PacienteDAOImpl implements PacienteDAO {
             ps.setString(1, t.getNombres());
             ps.setString(2, t.getApellidoPaterno());
             ps.setString(3, t.getApellidoMaterno());
-            
-            if (t.getFechaNacimiento() != null) {
-                ps.setDate(4, new java.sql.Date(t.getFechaNacimiento().getTime()));
-            } else {
-                ps.setNull(4, java.sql.Types.DATE);
-            }
-            
+            if (t.getFechaNacimiento() != null) ps.setDate(4, new java.sql.Date(t.getFechaNacimiento().getTime()));
+            else ps.setNull(4, java.sql.Types.DATE);
             ps.setString(5, t.getTelefono());
             ps.setString(6, t.getCorreo());
-            ps.setString(7, t.getEstado());
-            ps.setBoolean(8, t.getTieneSeguro());
+            ps.setString(7, t.getGrupoSanguineo());
+            ps.setString(8, t.getFactorRh());
+            ps.setString(9, t.getGradoInstruccion());
+            ps.setString(10, t.getOcupacion());
+            ps.setString(11, t.getEtnia());
             
-            // El DNI va en el WHERE (el índice 9)
-            ps.setString(9, t.getDni());
+            ps.setString(12, t.getDni()); 
             
             ps.executeUpdate();
             return t;
@@ -115,16 +110,6 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public void remove(Paciente t) {
-        String sql = "DELETE FROM Paciente WHERE dni = ?";
-        
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-             
-            ps.setString(1, t.getDni());
-            ps.executeUpdate();
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        throw new UnsupportedOperationException("Error: Método 'remove' deshabilitado por las restricciones de negocio para proteger esta tabla.");
     }
 }

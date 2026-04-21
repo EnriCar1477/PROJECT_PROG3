@@ -14,22 +14,34 @@ public class Paciente extends Persona {
 
     // --- GETTERS Y SETTERS INTERCALADOS ---
 
-    public String getGrupoSanguineo() { return grupoSanguineo; }
-    public void setGrupoSanguineo(String grupoSanguineo) { this.grupoSanguineo = grupoSanguineo; }
+    public String getGrupoSanguineo() {
+        return grupoSanguineo;
+    }
+
+    public void setGrupoSanguineo(String grupoSanguineo) {
+        this.grupoSanguineo = grupoSanguineo;
+    }
 
     public String getFactorRh() {
         return factorRh;
     }
-    public void setFactorRh(String factorRh) { this.factorRh = factorRh; }
+
+    public void setFactorRh(String factorRh) {
+        this.factorRh = factorRh;
+    }
 
     public String getGradoInstruccion() {
         return gradoInstruccion;
     }
-    public void setGradoInstruccion(String gradoInstruccion) { this.gradoInstruccion = gradoInstruccion; }
+
+    public void setGradoInstruccion(String gradoInstruccion) {
+        this.gradoInstruccion = gradoInstruccion;
+    }
 
     public String getOcupacion() {
         return ocupacion;
     }
+
     public void setOcupacion(String ocupacion) {
         this.ocupacion = ocupacion;
     }
@@ -37,21 +49,28 @@ public class Paciente extends Persona {
     public String getEtnia() {
         return etnia;
     }
-    public void setEtnia(String etnia) { this.etnia = etnia; }
+
+    public void setEtnia(String etnia) {
+        this.etnia = etnia;
+    }
 
     public HistorialMedico getHistorial() {
         return historial;
     }
+
     public void setHistorial(HistorialMedico historial) {
         this.historial = historial;
     }
 
+    public Paciente() {
+        super();
+    }
 
-    public Paciente() { super(); }
-
-    public Paciente(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento, String telefono, String correo, String grupoSanguineo, String factorRh,
-                    String gradoInstruccion, String ocupacion, String etnia) {
-        super(dni, nombres, apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo); // Datos heredados de Persona
+    public Paciente(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
+            String telefono, String correo, String grupoSanguineo, String factorRh,
+            String gradoInstruccion, String ocupacion, String etnia) {
+        super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo); // Datos heredados de
+                                                                                                  // Persona
         this.grupoSanguineo = grupoSanguineo;
         this.factorRh = factorRh;
         this.gradoInstruccion = gradoInstruccion;
