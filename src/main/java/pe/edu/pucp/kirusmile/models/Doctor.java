@@ -30,11 +30,11 @@ public class Doctor extends Persona{
         this.fechaIngreso = fechaIngreso;
     }
 	
-	@Override
-	public void mostrarDatos(){
-		
-		
-	}
+//	@Override
+//	public void mostrarDatos(){
+//
+//
+//	}
 	
 	
 	

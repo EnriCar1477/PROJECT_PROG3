@@ -2,56 +2,36 @@ package pe.edu.pucp.kirusmile.models;
 
 import java.util.Date;
 
-public class Tratamiento{//TRATAMIENTO
-	private int id;
-	private String nombreMedicamento;
-	private String dosis;
-	private String frecuencia;
-	private Date fechaInicio;
-	private Date fechaFin;
-	// O puede ser, en vez de fecha inicio y fin, periodo o intervalo de tiempo
-	private int idCita; // y cómo se explica esto? xd
-	
-	public Tratamiento(int id,String nombreMedicamento,String dosis,String frecuencia,Date fechaInicio,Date fechaFin,int idCita) {
-        this.id=id;
-        this.nombreMedicamento=nombreMedicamento;
-        this.dosis=dosis;
-        this.frecuencia=frecuencia;
-        this.fechaInicio=fechaInicio;
-        this.fechaFin=fechaFin;
-        this.idCita=idCita;
+public class Tratamiento {
+
+    // --- ATRIBUTOS ---
+    private TipoTratamiento tipo; // Asumiendo que es un Enum (ej. FARMACOLOGICO, TERAPIA, CIRUGIA)
+    private String indicaciones;
+    private Date fechaInicio;
+    private Date fechaFin;
+
+    // --- GETTERS Y SETTERS INTERCALADOS ---
+
+    public TipoTratamiento getTipo() {
+        return tipo;
     }
 
-    public int getId() {
-        return id;
+    public void setTipo(TipoTratamiento tipo) {
+        if (tipo == null) {
+            throw new IllegalArgumentException("El tipo de tratamiento es obligatorio.");
+        }
+        this.tipo = tipo;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getIndicaciones() {
+        return indicaciones;
     }
 
-    public String getNombreMedicamento() {
-        return nombreMedicamento;
-    }
-
-    public void setNombreMedicamento(String nombreMedicamento) {
-        this.nombreMedicamento = nombreMedicamento;
-    }
-
-    public String getDosis() {
-        return dosis;
-    }
-
-    public void setDosis(String dosis) {
-        this.dosis = dosis;
-    }
-
-    public String getFrecuencia() {
-        return frecuencia;
-    }
-
-    public void setFrecuencia(String frecuencia) {
-        this.frecuencia = frecuencia;
+    public void setIndicaciones(String indicaciones) {
+        if (indicaciones == null || indicaciones.trim().isEmpty()) {
+            throw new IllegalArgumentException("Las indicaciones del tratamiento no pueden estar vacías.");
+        }
+        this.indicaciones = indicaciones;
     }
 
     public Date getFechaInicio() {
@@ -67,22 +47,50 @@ public class Tratamiento{//TRATAMIENTO
     }
 
     public void setFechaFin(Date fechaFin) {
+        // Validación de lógica de negocio: El tratamiento no puede terminar antes de empezar
+        if (this.fechaInicio != null && fechaFin != null && fechaFin.before(this.fechaInicio)) {
+            throw new IllegalArgumentException("Error: La fecha de fin no puede ser anterior a la fecha de inicio.");
+        }
         this.fechaFin = fechaFin;
     }
 
-    public int getIdCita() {
-        return idCita;
+    // --- CONSTRUCTORES ---
+
+    public Tratamiento() {
+        // Constructor vacío
     }
 
-    public void setIdCita(int idCita) {
-        this.idCita = idCita;
+    public Tratamiento(TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin) {
+        this.setTipo(tipo); // Usamos setter para validación
+        this.setIndicaciones(indicaciones); // Usamos setter para validación
+        this.fechaInicio = fechaInicio;
+        this.setFechaFin(fechaFin); // Usamos setter para validar que fin > inicio
     }
-	
-	void emitirTratamiento(){ // iría realmente esto aquí?
-		
-	}
-	
-	void refillPrescription(){ // Esto qué es?
-		
-	}
+
+    // --- MÉTODOS ---
+
+    /**
+     * Verifica si el tratamiento sigue vigente en la fecha actual.
+     * Útil para que el sistema le avise al paciente o al médico si 
+     * aún debe seguir tomando la medicación.
+     */
+    public boolean esTratamientoActivo(Date fechaActual) {
+        if (this.fechaInicio == null || this.fechaFin == null || fechaActual == null) {
+            return false;
+        }
+        // Retorna true si la fecha actual está entre el inicio y el fin
+        return !fechaActual.before(this.fechaInicio) && !fechaActual.after(this.fechaFin);
+    }
+
+    /**
+     * Genera un formato de texto limpio para imprimir en la receta médica.
+     */
+    public String obtenerRecetaFormateada() {
+        // En Java antiguo se usaría SimpleDateFormat, pero aquí mostramos un resumen rápido
+        return String.format("[%s]\nIndicaciones: %s\nDesde: %tD Hasta: %tD", 
+                (this.tipo != null ? this.tipo.name() : "GENERAL"), 
+                this.indicaciones, 
+                this.fechaInicio, 
+                this.fechaFin);
+    }
 }

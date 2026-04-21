@@ -2,46 +2,100 @@ package pe.edu.pucp.kirusmile.models;
 
 import java.util.Date;
 
-public class Paciente extends Persona{
-	private String estado;//ACTIVO(ES PACIENTE REGISTRADO), INACTIVO(NO REGISTRADO), BETADO (NO ESTA PERMITIDO)
-	private boolean tieneSeguro;
-	
-	
-	public Paciente(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,String telefono,String correo,
-					String estado, boolean tieneSeguro){
-		super(dni,nombres,apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo);
-		this.estado=estado;
-		this.tieneSeguro=tieneSeguro;
-	
-	}
-	
+public class Paciente extends Persona {
 
-	public String getEstado() {
-        return estado;
+    // --- ATRIBUTOS (NTS 139 - Num. 6.1.2 y Anexo 2) ---
+    private String grupoSanguineo;
+    private String factorRh;
+    private String gradoInstruccion;
+    private String ocupacion;
+    private String etnia;
+    private HistorialMedico historial; // Relación 1 a 1 con su historial
+
+    // --- GETTERS Y SETTERS INTERCALADOS ---
+
+    public String getGrupoSanguineo() {
+        return grupoSanguineo;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-	
-	
-
-	public boolean getTieneSeguro() {
-        return tieneSeguro;
+    public void setGrupoSanguineo(String grupoSanguineo) {
+        // Ejemplo: A, B, AB, O
+        this.grupoSanguineo = grupoSanguineo;
     }
 
-    public void setTieneSeguro(boolean tieneSeguro) {
-        this.tieneSeguro = tieneSeguro;
+    public String getFactorRh() {
+        return factorRh;
     }
 
-	
-	@Override
-	public void mostrarDatos(){
-		
-		
-	}
-	
-	
-	
-	
+    public void setFactorRh(String factorRh) {
+        // Ejemplo: Positivo (+), Negativo (-)
+        this.factorRh = factorRh;
+    }
+
+    public String getGradoInstruccion() {
+        return gradoInstruccion;
+    }
+
+    public void setGradoInstruccion(String gradoInstruccion) {
+        // Primaria, Secundaria, Superior, etc.
+        this.gradoInstruccion = gradoInstruccion;
+    }
+
+    public String getOcupacion() {
+        return ocupacion;
+    }
+
+    public void setOcupacion(String ocupacion) {
+        this.ocupacion = ocupacion;
+    }
+
+    public String getEtnia() {
+        return etnia;
+    }
+
+    public void setEtnia(String etnia) {
+        // Mestizo, Quechua, Afrodescendiente, etc.
+        this.etnia = etnia;
+    }
+
+    public HistorialMedico getHistorial() {
+        return historial;
+    }
+
+    public void setHistorial(HistorialMedico historial) {
+        this.historial = historial;
+    }
+
+    // --- CONSTRUCTORES ---
+
+    public Paciente() {
+        super(); // Llama al constructor de Persona
+    }
+
+    public Paciente(String dni, String nombres, String apellidoPaterno,String apellidoMaterno, String grupoSanguineo, String factorRh) {
+        super(dni, nombres, apellidoPaterno,apellidoMaterno); // Datos heredados de Persona
+        this.grupoSanguineo = grupoSanguineo;
+        this.factorRh = factorRh;
+    }
+
+    // --- MÉTODOS ---
+
+    /**
+     * Según la NTS 139, al registrar un paciente nuevo se debe
+     * generar automáticamente su Historial Clínico.
+     */
+    public void generarHistorialAutomatico() {
+        if (this.historial == null) {
+            this.historial = new HistorialMedico();
+            System.out.println("Se ha generado el Historial Clínico N° " + this.getDni());
+        }
+    }
+
+    public String obtenerNombreCompleto() {
+        return this.getNombres() + " " + this.getApellidoPaterno() + " " +this.getApellidoMaterno();
+    }
+
+    public boolean tieneHistorialActivo() {
+        return this.historial != null;
+    }
 }
