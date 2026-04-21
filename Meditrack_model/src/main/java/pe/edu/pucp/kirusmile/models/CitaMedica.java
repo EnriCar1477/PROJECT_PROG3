@@ -5,7 +5,7 @@ import java.time.LocalTime;
 
 public class CitaMedica {
 
-    private int idCita;
+    private Integer idCita;
     private Date fechaCita;
     private LocalTime horaInicio;
     private LocalTime horaFin;
@@ -17,7 +17,7 @@ public class CitaMedica {
     //private double costoCita;
 
 
-    public CitaMedica(int idCita, Date fechaCita, LocalTime horaInicio, LocalTime horaFin, Paciente paciente,
+    public CitaMedica(Integer idCita, Date fechaCita, LocalTime horaInicio, LocalTime horaFin, Paciente paciente,
                       Medico medico, String estadoCita,boolean desactivado){
 
         this.idCita=idCita;
@@ -34,11 +34,11 @@ public class CitaMedica {
 
     //getter y setter
 
-    public int getIdCita(){
+    public Integer getIdCita(){
         return idCita;
     }
 
-    public void getIdCita(int idCita){
+    public void getIdCita(Integer idCita){
         this.idCita=idCita;
     }
 
