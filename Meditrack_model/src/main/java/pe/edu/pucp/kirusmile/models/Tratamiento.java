@@ -6,25 +6,25 @@ public class Tratamiento{//TRATAMIENTO
 
     
 
-    private int IdTratamiento;
+    private Integer IdTratamiento;
     private TipoTratamiento tipo;
     private String indicaciones;
     private Date fechaInicio;
     private Date fechaFin;
     private boolean desactivado;
 
-    public Tratamiento(TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin,boolean desactivado) {
+    public Tratamiento(Integer idTratamiendo,TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin,boolean desactivado) {
         this.tipo = tipo;
         this.indicaciones = indicaciones;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.desactivado=desactivado;
     }
-    public int getIdTratamiento() {
+    public Integer getIdTratamiento() {
         return IdTratamiento;
     }
 
-    public void setIdTratamiento(int idTratamiento) {
+    public void setIdTratamiento(Integer idTratamiento) {
         IdTratamiento = idTratamiento;
     }
     public TipoTratamiento getTipo() {
