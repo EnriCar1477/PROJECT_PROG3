@@ -15,7 +15,7 @@ public class TratamientoDAOImpl implements TratamientoDAO {
 
     @Override
     public Tratamiento load(Integer id) {
-        String sql = "SELECT idTratamiento, tipo, indicaciones, fechaInicio, fechaFin FROM Tratamiento WHERE idTratamiento = ?";
+        String sql = "SELECT IdTratamiento, tipo, indicaciones, fechaInicio, fechaFin, desactivado FROM Tratamiento WHERE IdTratamiento = ? AND desactivado = 0";
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -26,7 +26,8 @@ public class TratamientoDAOImpl implements TratamientoDAO {
                             rs.getString(2) != null ? TipoTratamiento.valueOf(rs.getString(2)) : null,
                             rs.getString(3),
                             rs.getDate(4),
-                            rs.getDate(5)
+                            rs.getDate(5),
+                            rs.getBoolean(6)
                     );
                     return tratamiento;
                 }
@@ -39,7 +40,8 @@ public class TratamientoDAOImpl implements TratamientoDAO {
 
     @Override
     public Tratamiento save(Tratamiento t) {
-        String sql = "INSERT INTO Tratamiento (tipo, indicaciones, fechaInicio, fechaFin) VALUES (?, ?, ?, ?)";
+        t.setDesactivado(false);
+        String sql = "INSERT INTO Tratamiento (tipo, indicaciones, fechaInicio, fechaFin, desactivado) VALUES (?, ?, ?, ?, ?)";
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, t.getTipo() != null ? t.getTipo().name() : null);
@@ -48,10 +50,9 @@ public class TratamientoDAOImpl implements TratamientoDAO {
             else ps.setNull(3, java.sql.Types.DATE);
             if (t.getFechaFin() != null) ps.setDate(4, new java.sql.Date(t.getFechaFin().getTime()));
             else ps.setNull(4, java.sql.Types.DATE);
+            ps.setBoolean(5, t.getDesactivado());
             
             ps.executeUpdate();
-            
-            // Ahora si podemos setear el ID autogenerado
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     t.setIdTratamiento(rs.getInt(1));
@@ -66,7 +67,7 @@ public class TratamientoDAOImpl implements TratamientoDAO {
 
     @Override
     public Tratamiento update(Tratamiento t) {
-        String sql = "UPDATE Tratamiento SET tipo = ?, indicaciones = ?, fechaInicio = ?, fechaFin = ? WHERE idTratamiento = ?";
+        String sql = "UPDATE Tratamiento SET tipo = ?, indicaciones = ?, fechaInicio = ?, fechaFin = ?, desactivado = ? WHERE IdTratamiento = ?";
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTipo() != null ? t.getTipo().name() : null);
@@ -75,8 +76,8 @@ public class TratamientoDAOImpl implements TratamientoDAO {
             else ps.setNull(3, java.sql.Types.DATE);
             if (t.getFechaFin() != null) ps.setDate(4, new java.sql.Date(t.getFechaFin().getTime()));
             else ps.setNull(4, java.sql.Types.DATE);
-            
-            ps.setInt(5, t.getIdTratamiento()); // Usa el ID en el WHERE
+            ps.setBoolean(5, t.getDesactivado());
+            ps.setInt(6, t.getIdTratamiento());
             
             ps.executeUpdate();
             return t;
@@ -88,6 +89,15 @@ public class TratamientoDAOImpl implements TratamientoDAO {
 
     @Override
     public void remove(Tratamiento t) {
-         throw new UnsupportedOperationException("Error: Método 'remove' deshabilitado por las restricciones de negocio para proteger esta tabla.");
+        t.setDesactivado(true);
+        String sql = "UPDATE Tratamiento SET desactivado = ? WHERE IdTratamiento = ?";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setBoolean(1, t.getDesactivado());
+            ps.setInt(2, t.getIdTratamiento());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,19 +1,26 @@
 package pe.edu.pucp.kirusmile.models;
 
 public class Anamnesis {
+    private Integer idAnamnesis;
     private String motivoPrincipal;
     private String tiempoEnfermedad;
     private String formaInicio;
     private String relatoClinico;
     private String antecedentesImportantes;
+    private boolean desactivado;
 
-    public Anamnesis(String motivoPrincipal, String tiempoEnfermedad, String formaInicio, String relatoClinico, String antecedentesImportantes) {
+    public Anamnesis(Integer idAnamnesis, String motivoPrincipal, String tiempoEnfermedad, String formaInicio, String relatoClinico, String antecedentesImportantes, boolean desactivado) {
+        this.idAnamnesis = idAnamnesis;
         this.motivoPrincipal = motivoPrincipal;
         this.tiempoEnfermedad = tiempoEnfermedad;
         this.formaInicio = formaInicio;
         this.relatoClinico = relatoClinico;
         this.antecedentesImportantes = antecedentesImportantes;
+        this.desactivado = desactivado;
     }
+
+    public Integer getIdAnamnesis() { return idAnamnesis; }
+    public void setIdAnamnesis(Integer idAnamnesis) { this.idAnamnesis = idAnamnesis; }
 
     public String getMotivoPrincipal() {
         return motivoPrincipal;
@@ -54,4 +61,7 @@ public class Anamnesis {
     public void setAntecedentesImportantes(String antecedentesImportantes) {
         this.antecedentesImportantes = antecedentesImportantes;
     }
+
+    public boolean getDesactivado() { return desactivado; }
+    public void setDesactivado(boolean desactivado) { this.desactivado = desactivado; }
 }

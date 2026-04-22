@@ -2,49 +2,47 @@ package pe.edu.pucp.kirusmile.models;
 
 import java.util.Date;
 
-public class Paciente extends Persona{
-	private Integer id;
-	private String estado;//ACTIVO(ES PACIENTE REGISTRADO), INACTIVO(NO REGISTRADO), BETADO (NO ESTA PERMITIDO)
-	private boolean tieneSeguro;
-	private boolean desactivado;
-	
-	
-	public Paciente(String dni,String nombres,String apellidoPaterno, String apellidoMaterno,Date fechaNacimiento,
-					String telefono,String correo,Integer id,String estado, boolean tieneSeguro,boolean desactivado){
-		super(dni,nombres,apellidoPaterno,apellidoMaterno,fechaNacimiento,telefono,correo);
-		this.id=id;
-		this.estado=estado;
-		this.tieneSeguro=tieneSeguro;
-		this.desactivado=desactivado;
-	}
+public class Paciente extends Persona {
+    private Integer id;
+    private String estado;// ACTIVO(ES PACIENTE REGISTRADO), INACTIVO(NO REGISTRADO), BETADO (NO ESTA
+                          // PERMITIDO)
+    private boolean tieneSeguro;
+    private boolean desactivado;
 
-	public Integer getId() {
-		return id;
-	}
+    public Paciente(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
+            String telefono, String correo, Integer id, String estado, boolean tieneSeguro, boolean desactivado) {
+        super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo);
+        this.id = id;
+        this.estado = estado;
+        this.tieneSeguro = tieneSeguro;
+        this.desactivado = desactivado;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public boolean getDesactivado() {
-		return desactivado;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public void setDesactivado(boolean desactivado) {
-		this.desactivado = desactivado;
-	}
+    public boolean getDesactivado() {
+        return desactivado;
+    }
 
-	public String getEstado() {
+    public void setDesactivado(boolean desactivado) {
+        this.desactivado = desactivado;
+    }
+
+    public String getEstado() {
         return estado;
     }
 
     public void setEstado(String estado) {
         this.estado = estado;
     }
-	
-	
 
-	public boolean getTieneSeguro() {
+    public boolean getTieneSeguro() {
         return tieneSeguro;
     }
 
@@ -52,9 +50,10 @@ public class Paciente extends Persona{
         this.tieneSeguro = tieneSeguro;
     }
 
-	
-	@Override
-	public void mostrarDatos(){
-		
-	}
+    /*
+     * @Override
+     * public void mostrarDatos(){
+     * 
+     * }
+     */
 }

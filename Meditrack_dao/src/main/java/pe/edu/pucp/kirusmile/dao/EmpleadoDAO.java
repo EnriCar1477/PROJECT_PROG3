@@ -3,6 +3,6 @@ package pe.edu.pucp.kirusmile.dao;
 import pe.edu.pucp.kirusmile.dao.base.BaseDAO;
 import pe.edu.pucp.kirusmile.models.Empleado;
 
-public interface EmpleadoDAO extends BaseDAO<Empleado,Integer>{
+public interface EmpleadoDAO extends BaseDAO<Empleado, String> {
 	
 }

@@ -3,9 +3,10 @@ import pe.edu.pucp.kirusmile.dao.impl.*;
 import pe.edu.pucp.kirusmile.models.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Date;
 
 public class Program {
-    public static void main() {
+    public static void main(String[] args) {
         System.out.println("--- INICIANDO PRUEBAS CRUD ---");
 
         // Inicializar DAOs
@@ -13,52 +14,47 @@ public class Program {
         MedicoDAO medicoDAO = new MedicoDAOImpl();
         CitaMedicaDAO citaMedicaDAO = new CitaMedicaDAOImpl();
         TratamientoDAO tratamientoDAO = new TratamientoDAOImpl();
-
+        
         // ---------------------------------------------------------
         // 1. CREACIÓN DE DATOS (SAVE)
         // ---------------------------------------------------------
         System.out.println("\n1. Insertando Paciente...");
-        Paciente p1 = new Paciente("12345678", "Juan", "Perez", "Gomez", new java.util.Date(),
-                "999888777", "juan@gmail.com", "O+", "Positivo", "Superior",
-                "Ingeniero", "Mestizo");
+        Paciente p1 = new Paciente("12345678", "Juan", "Perez", "Gomez", new java.util.Date(), 
+                                   "999888777", "juan@gmail.com", 1, "ACTIVO", true, false);
         pacienteDAO.save(p1);
-        System.out.println("  -> Paciente guardado con DNI: " + p1.getDni());
+        System.out.println("  -> Paciente guardado con ID autogenerado: " + p1.getId());
 
         System.out.println("\n2. Insertando Medico...");
-        Medico m1 = new Medico("87654321", "Dr. Luis", "Sanchez", "Vera", new java.util.Date(),
-                "999111222", "luis@med.com", "CMP123", "RNE456", null, new java.util.Date(),
-                "firma_digital_xyz", null);
+        Medico m1 = new Medico("87654321", "Dr. Luis", "Sanchez", "Vera", new java.util.Date(), 
+                               "999111222", "luis@med.com", 2, "CMP123", "RNE456", null, new java.util.Date(), 
+                               "firma_digital_xyz", null, false);
         medicoDAO.save(m1);
-        System.out.println("  -> Medico guardado con DNI: " + m1.getDni());
+        System.out.println("  -> Medico guardado con ID autogenerado: " + m1.getId());
 
         System.out.println("\n3. Insertando Cita Medica...");
-        CitaMedica c1 = new CitaMedica();
-        c1.setFecha(LocalDate.now());
-        c1.setHoraInicio(LocalTime.of(10, 0));
-        c1.setHoraFin(LocalTime.of(10, 30));
-        c1.setEstado(EstadoCita.PROGRAMADA);
-        c1.setPaciente(p1);
-        c1.setMedicoAsignado(m1);
+        CitaMedica c1 = new CitaMedica(3, new java.util.Date(), LocalTime.of(10, 0), LocalTime.of(10, 30), p1, m1, "PROGRAMADA", false);
         citaMedicaDAO.save(c1);
         System.out.println("  -> Cita guardada con ID BD: " + c1.getIdCita());
 
         System.out.println("\n4. Insertando Tratamiento...");
-        Tratamiento t1 = new Tratamiento(0, TipoTratamiento.PREVENTIVO, "Tomar paracetamol 500mg cada 8 horas",
-                new java.util.Date(), new java.util.Date());
+        Tratamiento t1 = new Tratamiento(4, TipoTratamiento.PREVENTIVO, "Tomar paracetamol", new java.util.Date(), new java.util.Date(), false);
         tratamientoDAO.save(t1);
-        System.out.println("  -> Tratamiento guardado (indicaciones): " + t1.getIndicaciones());
+        System.out.println("  -> Tratamiento guardado (ID): " + t1.getIdTratamiento());
+
 
         // ---------------------------------------------------------
         // 2. LECTURA DE DATOS (LOAD)
         // ---------------------------------------------------------
-        System.out.println("\n--- PRUEBA DE LECTURA (LOAD) ---");
-        Paciente pLoaded = pacienteDAO.load("12345678");
-        if (pLoaded != null)
-            System.out.println("Paciente leido BD -> DNI: " + pLoaded.getDni() + " | Nombres: " + pLoaded.getNombres());
-
-        Medico mLoaded = medicoDAO.load("87654321");
-        if (mLoaded != null)
-            System.out.println("Medico leido BD -> DNI: " + mLoaded.getDni() + " | CMP: " + mLoaded.getCmp());
+        System.out.println("\n--- PRUEBA DE LECTURA (LOAD) usando el nuevo Integer ID ---");
+        // Nota: Si la bd está vacía, p1.getId() tendría el primer ID (ej: 1)
+        Integer idPacienteABuscar = p1.getId() != null ? p1.getId() : 1; 
+        Paciente pLoaded = pacienteDAO.load(idPacienteABuscar);
+        if(pLoaded != null) System.out.println("Paciente leido BD -> ID: " + pLoaded.getId() + " | Nombres: " + pLoaded.getNombres());
+        
+        Integer idMedicoABuscar = m1.getId() != null ? m1.getId() : 1;
+        Medico mLoaded = medicoDAO.load(idMedicoABuscar);
+        if(mLoaded != null) System.out.println("Medico leido BD -> ID: " + mLoaded.getId() + " | CMP: " + mLoaded.getCmp());
+        
 
         // ---------------------------------------------------------
         // 3. ACTUALIZACION DE DATOS (UPDATE)
@@ -70,18 +66,16 @@ public class Program {
             pacienteDAO.update(pLoaded);
             System.out.println("  -> Correo de Paciente actualizado en BD a: " + pLoaded.getCorreo());
         }
-
+        
         // ---------------------------------------------------------
-        // 4. ELIMINACION DE DATOS (REMOVE - DENEGADO)
+        // 4. ELIMINACION DE DATOS (SOFT DELETE)
         // ---------------------------------------------------------
-        System.out.println("\n--- PRUEBA DE ELIMINACION (Debe saltar error por regla de negocio) ---");
-        try {
-            pacienteDAO.remove(p1);
-        } catch (UnsupportedOperationException ex) {
-            System.out.println("  -> Correcto: " + ex.getMessage());
+        System.out.println("\n--- PRUEBA DE ELIMINACION (Soft Delete) ---");
+        if (pLoaded != null) {
+            pacienteDAO.remove(pLoaded);
+            System.out.println("  -> Correcto: Paciente desactivado lógicamente (desactivado = true)");
         }
 
         System.out.println("\n=== Pruebas CRUD terminadas exitosamente ===");
     }
-
 }
