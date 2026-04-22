@@ -68,7 +68,7 @@ public class Program {
         System.out.println("\n--- PRUEBA DE ELIMINACION (Soft Delete) ---");
         if (pLoaded != null) {
             especialidadDAO.remove(pLoaded);
-            System.out.println("  -> Correcto: Paciente desactivado lógicamente (desactivado = true)");
+            System.out.println("  -> Correcto: Especialidad desactivado lógicamente (desactivado = true)");
         }
 
         System.out.println("\n=== Pruebas CRUD terminadas exitosamente ===");
