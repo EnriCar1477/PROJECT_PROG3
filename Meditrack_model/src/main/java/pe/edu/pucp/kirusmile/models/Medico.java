@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 public class Medico extends Persona{
-	private Integer id;
 	private String cmp;
 	private String rne;
 	private Especialidad especialidad;
