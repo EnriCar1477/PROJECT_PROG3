@@ -1,5 +1,6 @@
 package pe.edu.pucp.kirusmile.dbmanager;
 
+import pe.edu.pucp.kirusmile.dbmanager.util.Cifrado;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -39,7 +40,7 @@ public class DBManager {
 
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection(url, user, password);
+            return DriverManager.getConnection(url, user, Cifrado.descifrar(password));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
