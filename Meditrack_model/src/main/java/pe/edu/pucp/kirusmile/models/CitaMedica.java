@@ -16,10 +16,9 @@ public class CitaMedica {
     //private double costoCita;
 
 
-    public CitaMedica(Integer idCita, Date fechaCita, LocalTime horaInicio, LocalTime horaFin, Paciente paciente,
+    public CitaMedica( Date fechaCita, LocalTime horaInicio, LocalTime horaFin, Paciente paciente,
                       Medico medico, String estadoCita,boolean desactivado){
 
-        this.idCita=idCita;
         this.fechaCita=fechaCita;
         this.horaInicio=horaInicio;
         this.horaFin=horaFin;
@@ -32,15 +31,6 @@ public class CitaMedica {
 
 
     //getter y setter
-
-    public Integer getIdCita(){
-        return idCita;
-    }
-
-    public void getIdCita(Integer idCita){
-        this.idCita=idCita;
-    }
-
 
     public Date getFechaCita(){
         return fechaCita;
