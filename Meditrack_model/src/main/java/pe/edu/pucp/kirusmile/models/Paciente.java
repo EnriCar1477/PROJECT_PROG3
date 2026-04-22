@@ -3,53 +3,63 @@ package pe.edu.pucp.kirusmile.models;
 import java.util.Date;
 
 public class Paciente extends Persona {
-    private Integer id;
-    private String estado;// ACTIVO(ES PACIENTE REGISTRADO), INACTIVO(NO REGISTRADO), BETADO (NO ESTA
+    private String grupoSanguineo;
+    private String factorRh;// ACTIVO(ES PACIENTE REGISTRADO), INACTIVO(NO REGISTRADO), BETADO (NO ESTA
                           // PERMITIDO)
-    private boolean tieneSeguro;
-    private boolean desactivado;
+    private String gradoInstruccion;
+    private String ocupacion;
+    private String etnia;
 
     public Paciente(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
             String telefono, String correo, Integer id, String estado, boolean tieneSeguro, boolean desactivado) {
         super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo);
-        this.id = id;
-        this.estado = estado;
-        this.tieneSeguro = tieneSeguro;
-        this.desactivado = desactivado;
+        this.grupoSanguineo = grupoSanguineo;
+        this.factorRh = factorRh;
+        this.gradoInstruccion = gradoInstruccion;
+        this.ocupacion = ocupacion;
+        this.etnia = etnia;
     }
 
-    public Integer getId() {
-        return id;
+    public String getGrupoSanguineo() {
+        return grupoSanguineo;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setGrupoSanguineo(String grupoSanguineo) {
+        this.grupoSanguineo = grupoSanguineo;
     }
 
-    public boolean getDesactivado() {
-        return desactivado;
+    public String getFactorRh() {
+        return factorRh;
     }
 
-    public void setDesactivado(boolean desactivado) {
-        this.desactivado = desactivado;
+    public void setFactorRh(String factorRh) {
+        this.factorRh = factorRh;
     }
 
-    public String getEstado() {
-        return estado;
+    public String getGradoInstruccion() {
+        return gradoInstruccion;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setGradoInstruccion(String gradoInstruccion) {
+        this.gradoInstruccion = gradoInstruccion;
     }
 
-    public boolean getTieneSeguro() {
-        return tieneSeguro;
+    public String getOcupacion() {
+        return ocupacion;
     }
 
-    public void setTieneSeguro(boolean tieneSeguro) {
-        this.tieneSeguro = tieneSeguro;
+    public void setOcupacion(String ocupacion) {
+        this.ocupacion = ocupacion;
     }
 
+    public String getEtnia() {
+        return etnia;
+    }
+
+    public void setEtnia(String etnia) {
+        this.etnia = etnia;
+    }
+   
     /*
      * @Override
      * public void mostrarDatos(){
