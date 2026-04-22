@@ -38,6 +38,10 @@ public class Program {
         medicoDAO.save(m1);
         System.out.println("  -> Medico guardado con ID autogenerado: " + m1.getDni());
 
+        System.out.println("\n3. Insertando Enfermedad (Prueba Local)...");
+        EnfermedadCIE10 enfermedad = new EnfermedadCIE10("K02.9", "Caries dental, no especificada");
+        System.out.println("  -> Enfermedad creada en memoria: " + enfermedad.getCodigocCIE() + " - " + enfermedad.getDescripcionOficial());
+
 /*
         System.out.println("\n4. Insertando Tratamiento...");
         Tratamiento t1 = new Tratamiento(4, TipoTratamiento.PREVENTIVO, "Tomar paracetamol", new java.util.Date(), new java.util.Date(), false);

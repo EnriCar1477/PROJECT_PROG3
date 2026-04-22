@@ -13,10 +13,11 @@ public class Medico extends Empleado {
 	private boolean desactivado;
 
 	public Medico(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
-			String telefono, String correo, String codigoEmpleado, Date fechaVinculacion, 
+			String telefono, String correo, String codigoEmpleado, Date fechaVinculacion,
 			String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
 			String firmaDigital, List<HorarioDisponibilidad> listaHorarios, boolean desactivado) {
-		super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, codigoEmpleado, fechaVinculacion);
+		super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, codigoEmpleado,
+				fechaVinculacion);
 		this.cmp = cmp;
 		this.rne = rne;
 		this.especialidad = especialidad;
