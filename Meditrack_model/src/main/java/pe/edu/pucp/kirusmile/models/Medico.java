@@ -14,10 +14,9 @@ public class Medico extends Persona{
 
 
 	public Medico(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
-				  String telefono, String correo,Integer id, String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
+				  String telefono, String correo, String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
 				  String firmaDigital, List<HorarioDisponibilidad> listaHorarios,boolean desactivado) {
 		super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo);
-		this.id=id;
 		this.cmp = cmp;
 		this.rne = rne;
 		this.especialidad = especialidad;
@@ -33,14 +32,6 @@ public class Medico extends Persona{
 
 	public void setDesactivado(boolean desactivado) {
 		this.desactivado = desactivado;
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 	public String getCmp() {
