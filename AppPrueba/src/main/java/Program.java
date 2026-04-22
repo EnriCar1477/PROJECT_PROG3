@@ -13,7 +13,7 @@ public class Program {
         EspecialidadDAO especialidadDAO = new EspecialidadDAOImpl();
         PacienteDAO pacienteDAO = new PacienteDAOImpl();
         MedicoDAO medicoDAO = new MedicoDAOImpl();
-        TratamientoDAO tratamientoDAO = new TratamientoDAOImpl();
+        EnfermedadCIE10DAO enfermedadDAO = new EnfermedadCIE10DAOImpl();
         
         // ---------------------------------------------------------
         // 1. CREACIÓN DE DATOS (SAVE)
@@ -40,14 +40,9 @@ public class Program {
 
         System.out.println("\n3. Insertando Enfermedad (Prueba Local)...");
         EnfermedadCIE10 enfermedad = new EnfermedadCIE10("K02.9", "Caries dental, no especificada");
+        enfermedadDAO.save(enfermedad);
         System.out.println("  -> Enfermedad creada en memoria: " + enfermedad.getCodigocCIE() + " - " + enfermedad.getDescripcionOficial());
 
-/*
-        System.out.println("\n4. Insertando Tratamiento...");
-        Tratamiento t1 = new Tratamiento(4, TipoTratamiento.PREVENTIVO, "Tomar paracetamol", new java.util.Date(), new java.util.Date(), false);
-        tratamientoDAO.save(t1);
-        System.out.println("  -> Tratamiento guardado (ID): " + t1.getIdTratamiento());
-*/
 
         // ---------------------------------------------------------
         // 2. LECTURA DE DATOS (LOAD)
