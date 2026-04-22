@@ -3,7 +3,7 @@ package pe.edu.pucp.kirusmile.models;
 import java.util.Date;
 import java.util.List;
 
-public class Medico extends Persona{
+public class Medico extends Persona {
 	private String cmp;
 	private String rne;
 	private Especialidad especialidad;
@@ -12,19 +12,17 @@ public class Medico extends Persona{
 	private List<HorarioDisponibilidad> listaHorarios;
 	private boolean desactivado;
 
-
 	public Medico(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
-				  String telefono, String correo,Integer id, String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
-				  String firmaDigital, List<HorarioDisponibilidad> listaHorarios,boolean desactivado) {
+			String telefono, String correo, String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
+			String firmaDigital, List<HorarioDisponibilidad> listaHorarios, boolean desactivado) {
 		super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo);
-		this.id=id;
 		this.cmp = cmp;
 		this.rne = rne;
 		this.especialidad = especialidad;
 		this.fechaIngreso = fechaIngreso;
 		this.firmaDigital = firmaDigital;
 		this.listaHorarios = listaHorarios;
-		this.desactivado=desactivado;
+		this.desactivado = desactivado;
 	}
 
 	public boolean getDesactivado() {
@@ -33,14 +31,6 @@ public class Medico extends Persona{
 
 	public void setDesactivado(boolean desactivado) {
 		this.desactivado = desactivado;
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 	public String getCmp() {
@@ -90,13 +80,15 @@ public class Medico extends Persona{
 	public void setListaHorarios(List<HorarioDisponibilidad> listaHorarios) {
 		this.listaHorarios = listaHorarios;
 	}
-	public void registrarCredenciales(String cmp,String rne,Especialidad especialidad){
+
+	public void registrarCredenciales(String cmp, String rne, Especialidad especialidad) {
 
 	}
-	/*public boolean validarEspecialidad(){}*/
-	public void actualizarFirmarDigital(String nuevoToken){
+
+	/* public boolean validarEspecialidad(){} */
+	public void actualizarFirmarDigital(String nuevoToken) {
 		this.setFirmaDigital(firmaDigital);
 	}
 
-	/*public double obtenerTarifaConsulta(){}*/
+	/* public double obtenerTarifaConsulta(){} */
 }
