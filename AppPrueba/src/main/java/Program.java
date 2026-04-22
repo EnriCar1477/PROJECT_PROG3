@@ -33,7 +33,7 @@ public class Program {
 
         System.out.println("\n2. Insertando Medico...");
         Medico m1 = new Medico("87654321", "Dr. Luis", "Sanchez", "Vera", new java.util.Date(),
-                "999111222", "luis@med.com", "3", "56", null, null,
+                "999111222", "luis@med.com", "EMP001", new java.util.Date(), "3", "56", null, null,
                 "peruano", null, false);
         medicoDAO.save(m1);
         System.out.println("  -> Medico guardado con ID autogenerado: " + m1.getDni());

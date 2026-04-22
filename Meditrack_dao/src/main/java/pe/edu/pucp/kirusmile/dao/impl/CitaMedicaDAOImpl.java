@@ -24,7 +24,7 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Paciente paciente = new Paciente(rs.getString(5), null, null, null, null, null, null, null, null, null, null, null);
-                    Medico medico = new Medico(null, null, null, null, null, null, null, rs.getString(6), null, null, null, null, null, false);
+                    Medico medico = new Medico(null, null, null, null, null, null, null, null, null, rs.getString(6), null, null, null, null, null, false);
 
                     CitaMedica cita = new CitaMedica(
                             rs.getInt(1),

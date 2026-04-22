@@ -21,7 +21,7 @@ public class MedicoDAOImpl implements MedicoDAO {
                 if (rs.next()) {
                     Medico medico = new Medico(
                             rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
-                            rs.getDate(5), rs.getString(6), rs.getString(7), rs.getString(8),
+                            rs.getDate(5), rs.getString(6), rs.getString(7), null, null, rs.getString(8),
                             rs.getString(9), null, rs.getDate(10), rs.getString(11), null, rs.getBoolean(12)
                     );
                     return medico;
