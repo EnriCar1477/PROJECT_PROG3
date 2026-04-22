@@ -3,19 +3,30 @@ package pe.edu.pucp.kirusmile.models;
 import java.util.Date;
 
 public class Tratamiento{//TRATAMIENTO
+    private Integer idTratamiento;
     private TipoTratamiento tipo;
     private String indicaciones;
     private Date fechaInicio;
     private Date fechaFin;
     private boolean desactivado;
 
-    public Tratamiento(TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin,boolean desactivado) {
+    public Tratamiento(Integer idTratamiento, TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin,boolean desactivado) {
+        this.idTratamiento = idTratamiento;
         this.tipo = tipo;
         this.indicaciones = indicaciones;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.desactivado=desactivado;
     }
+
+    public Integer getIdTratamiento() {
+        return idTratamiento;
+    }
+
+    public void setIdTratamiento(Integer idTratamiento) {
+        this.idTratamiento = idTratamiento;
+    }
+
     public TipoTratamiento getTipo() {
         return tipo;
     }

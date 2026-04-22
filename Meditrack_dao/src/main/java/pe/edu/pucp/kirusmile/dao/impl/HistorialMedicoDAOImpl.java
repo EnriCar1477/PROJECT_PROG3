@@ -22,7 +22,7 @@ public class HistorialMedicoDAOImpl implements HistorialMedicoDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Paciente paciente = new Paciente(null,null,null,null,null,null,null,rs.getInt(3),null,false,false);
+                    Paciente paciente = new Paciente(rs.getString(3),null,null,null,null,null,null,null,null,null,null,null);
                     return new HistorialMedico(rs.getInt(1), rs.getString(2), paciente, new ArrayList<>());
                 }
             }
@@ -38,7 +38,7 @@ public class HistorialMedicoDAOImpl implements HistorialMedicoDAO {
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, t.getObservaciones());
-            ps.setObject(2, t.getPaciente() != null ? t.getPaciente().getId() : null);
+            ps.setString(2, t.getPaciente() != null ? t.getPaciente().getDni() : null);
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) t.setIdHistorial(rs.getInt(1));
@@ -56,7 +56,7 @@ public class HistorialMedicoDAOImpl implements HistorialMedicoDAO {
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getObservaciones());
-            ps.setObject(2, t.getPaciente() != null ? t.getPaciente().getId() : null);
+            ps.setString(2, t.getPaciente() != null ? t.getPaciente().getDni() : null);
             ps.setInt(3, t.getIdHostorial()); // Typo en modelo getIdHostorial()
             ps.executeUpdate();
             return t;

@@ -11,7 +11,7 @@ public class Paciente extends Persona {
     private String etnia;
 
     public Paciente(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
-            String telefono, String correo, Integer id, String estado, boolean tieneSeguro, boolean desactivado) {
+            String telefono, String correo, String grupoSanguineo, String factorRh, String gradoInstruccion, String ocupacion, String etnia) {
         super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo);
         this.grupoSanguineo = grupoSanguineo;
         this.factorRh = factorRh;
