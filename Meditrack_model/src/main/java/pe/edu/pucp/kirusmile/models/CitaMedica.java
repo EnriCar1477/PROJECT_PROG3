@@ -5,7 +5,6 @@ import java.time.LocalTime;
 
 public class CitaMedica {
 
-    private Integer idCita;
     private Date fechaCita;
     private LocalTime horaInicio;
     private LocalTime horaFin;
