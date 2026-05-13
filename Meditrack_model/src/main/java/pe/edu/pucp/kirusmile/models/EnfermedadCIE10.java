@@ -1,20 +1,37 @@
 package pe.edu.pucp.kirusmile.models;
 
 public class EnfermedadCIE10 {
-    private String codigocCIE;
-    private String descripcionOficial;
 
-    public EnfermedadCIE10(String codigocCIE, String descripcionOficial) {
-        this.codigocCIE = codigocCIE;
+    // --- ATRIBUTOS ---
+    private int idEnfermedadCIE10;   // ID como tipo primitivo int
+    private String codigoCIE;         // Ejemplo: "K02.1"
+    private String descripcionOficial; // Ejemplo: "Caries de la dentina"
+
+    // --- CONSTRUCTORES ---
+    public EnfermedadCIE10() {
+    }
+
+    public EnfermedadCIE10(int idEnfermedadCIE10, String codigoCIE, String descripcionOficial) {
+        this.idEnfermedadCIE10 = idEnfermedadCIE10;
+        this.codigoCIE = codigoCIE;
         this.descripcionOficial = descripcionOficial;
     }
 
-    public String getCodigocCIE() {
-        return codigocCIE;
+    // --- GETTERS Y SETTERS ---
+    public int getIdEnfermedadCIE10() {
+        return idEnfermedadCIE10;
     }
 
-    public void setCodigocCIE(String codigocCIE) {
-        this.codigocCIE = codigocCIE;
+    public void setIdEnfermedadCIE10(int idEnfermedadCIE10) {
+        this.idEnfermedadCIE10 = idEnfermedadCIE10;
+    }
+
+    public String getCodigoCIE() {
+        return codigoCIE;
+    }
+
+    public void setCodigoCIE(String codigoCIE) {
+        this.codigoCIE = codigoCIE;
     }
 
     public String getDescripcionOficial() {

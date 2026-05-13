@@ -1,66 +1,123 @@
 package pe.edu.pucp.kirusmile.dao.impl;
 
-import pe.edu.pucp.kirusmile.dao.LogAuditoriaDAO;
-import pe.edu.pucp.kirusmile.models.LogAuditoria;
+import pe.edu.pucp.kirusmile.dao.inter.LogAuditoriaDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
+import pe.edu.pucp.kirusmile.models.Empleado;
+import pe.edu.pucp.kirusmile.models.LogAuditoria;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
 
+    // 1. Declaramos la conexión como atributo privado de la clase
+    private Connection con;
+
+    // 2. Inicializamos la conexión en el constructor
+    public LogAuditoriaDAOImpl() {
+        this.con = DBManager.getInstance().getConnection();
+    }
+
+
     @Override
-    public LogAuditoria load(Integer id) {
-        String sql = "SELECT idLog, fechaHora, accionRealizada, ipTerminal FROM LogAuditoria WHERE idLog = ?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
+    public int save(LogAuditoria objeto) {
+        int idGenerado = 0;
+        String sql = "INSERT INTO LogAuditoria (fid_empleado, fecha_hora, accion_realizada, ip_terminal) " +
+                "VALUES (?, ?, ?, ?)";
+
+        // El try-with-resources ahora solo maneja el PreparedStatement
+        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pst.setInt(1, objeto.getEmpleado().getIdEmpleado());
+            pst.setTimestamp(2, Timestamp.valueOf(objeto.getFechaHora()));
+            pst.setString(3, objeto.getAccionRealizada());
+            pst.setString(4, objeto.getIpTerminal());
+
+            pst.executeUpdate();
+
+            try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
-                    LogAuditoria log = new LogAuditoria();
-                    log.setIdLog(rs.getInt(1));
-                    if(rs.getTimestamp(2) != null) log.setFechaHora(rs.getTimestamp(2).toLocalDateTime());
-                    log.setAccionRealizada(rs.getString(3));
-                    log.setIpTerminal(rs.getString(4));
-                    return log;
+                    idGenerado = rs.getInt(1);
+                    objeto.setIdLogAuditoria(idGenerado);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al guardar LogAuditoria: " + e.getMessage());
         }
-        return null;
+        return idGenerado;
+    }
+
+    // REGLA DE SEGURIDAD ESTRICTA: Los logs son inmutables
+    @Override
+    public int update(LogAuditoria objeto) {
+        throw new UnsupportedOperationException("Violación de Seguridad: Un registro de auditoría jamás debe ser modificado.");
+    }
+
+    // REGLA DE SEGURIDAD ESTRICTA: Los logs no se borran
+    @Override
+    public int delete(int id) {
+        throw new UnsupportedOperationException("Violación de Seguridad: Un registro de auditoría jamás debe ser eliminado.");
     }
 
     @Override
-    public LogAuditoria save(LogAuditoria t) {
-        String sql = "INSERT INTO LogAuditoria (fechaHora, accionRealizada, ipTerminal) VALUES (?, ?, ?)";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            if(t.getFechaHora() != null) ps.setTimestamp(1, java.sql.Timestamp.valueOf(t.getFechaHora()));
-            else ps.setNull(1, java.sql.Types.TIMESTAMP);
-            ps.setString(2, t.getAccionRealizada());
-            ps.setString(3, t.getIpTerminal());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) t.setIdLog(rs.getInt(1));
+    public LogAuditoria load(int id) {
+        LogAuditoria log = null;
+        String sql = "SELECT * FROM LogAuditoria WHERE id_log_auditoria = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    log = new LogAuditoria();
+                    log.setIdLogAuditoria(rs.getInt("id_log_auditoria"));
+                    log.setFechaHora(rs.getTimestamp("fecha_hora").toLocalDateTime());
+                    log.setAccionRealizada(rs.getString("accion_realizada"));
+                    log.setIpTerminal(rs.getString("ip_terminal"));
+
+                    Empleado empleado = new Empleado();
+                    empleado.setIdEmpleado(rs.getInt("fid_empleado"));
+                    log.setEmpleado(empleado);
+                }
             }
-            return t;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al cargar LogAuditoria: " + e.getMessage());
         }
-        return null;
+        return log;
     }
 
     @Override
-    public LogAuditoria update(LogAuditoria t) {
-        throw new UnsupportedOperationException("Error: Los Logs de Auditoria son inmutables y no pueden ser alterados o actualizados.");
+    public List<LogAuditoria> listALL() {
+        List<LogAuditoria> lista = new ArrayList<>();
+        String sql = "SELECT id_log_auditoria FROM LogAuditoria ORDER BY fecha_hora DESC";
+
+        try (PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(this.load(rs.getInt(1)));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar Logs de Auditoría: " + e.getMessage());
+        }
+        return lista;
     }
 
     @Override
-    public void remove(LogAuditoria t) {
-        throw new UnsupportedOperationException("Error: Los Logs de Auditoria jamas deben eliminarse bajo ninguna circunstancia de negocio.");
+    public List<LogAuditoria> listarPorFidEmpleado(int fid_empleado) {
+        List<LogAuditoria> lista = new ArrayList<>();
+        String sql = "SELECT id_log_auditoria FROM LogAuditoria WHERE fid_empleado = ? ORDER BY fecha_hora DESC";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, fid_empleado);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(this.load(rs.getInt(1)));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar logs por empleado: " + e.getMessage());
+        }
+        return lista;
     }
 }

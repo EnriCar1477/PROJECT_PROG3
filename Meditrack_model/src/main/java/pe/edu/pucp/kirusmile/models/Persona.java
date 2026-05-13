@@ -1,20 +1,46 @@
 package pe.edu.pucp.kirusmile.models;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Calendar;
 
 public class Persona {
 
-    // --- ATRIBUTOS ---
-    private String dni;
+    // --- ATRIBUTOS PROPIOS ---
+    private int idPersona;
+    private String dni; // Identificador principal
     private String nombres;
     private String apellidoPaterno;
     private String apellidoMaterno;
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento; // Usamos LocalDate para la fecha exacta del calendario
     private String telefono;
     private String correo;
 
-    // --- GETTERS Y SETTERS INTERCALADOS ---
+    // --- CONSTRUCTORES ---
+    public Persona() {
+    }
+
+    public Persona(String dni, String nombres, String apellidoPaterno, String apellidoMaterno,
+                   LocalDate fechaNacimiento, String telefono, String correo) {
+        this.dni = dni;
+        this.nombres = nombres;
+        this.apellidoPaterno = apellidoPaterno;
+        this.apellidoMaterno = apellidoMaterno;
+        this.fechaNacimiento = fechaNacimiento;
+        this.telefono = telefono;
+        this.correo = correo;
+    }
+
+    // --- GETTERS Y SETTERS ---
+
+
+    public int getIdPersona() {
+        return idPersona;
+    }
+
+    public void setIdPersona(int idPersona) {
+        this.idPersona = idPersona;
+    }
 
     public String getDni() {
         return dni;
@@ -48,11 +74,11 @@ public class Persona {
         this.apellidoMaterno = apellidoMaterno;
     }
 
-    public Date getFechaNacimiento() {
+    public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }
 
-    public void setFechaNacimiento(Date fechaNacimiento) {
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
 
@@ -71,51 +97,25 @@ public class Persona {
     public void setCorreo(String correo) {
         this.correo = correo;
     }
+	
+	/*
+	
+	Sobre el String dni en Persona.java
 
-    // --- CONSTRUCTORES ---
+	Observación: El DNI está como String, lo cual es la decisión correcta 
+	(si fuera un int, los DNIs que empiezan con cero como "0456..." perderían el cero inicial).
 
-    public Persona() {
-        // Constructor vacío
-    }
-
-    public Persona(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento, String telefono, String correo) {
-        this.dni = dni;
-        this.nombres = nombres;
-        this.apellidoPaterno = apellidoPaterno;
-        this.apellidoMaterno = apellidoMaterno;
-        this.fechaNacimiento = fechaNacimiento;
-        this.telefono = telefono;
-        this.correo = correo;
-    }
-
-    // --- MÉTODOS ---
-
-    /**
-     * Retorna el nombre completo concatenando los tres campos de nombre.
-     */
-    public String obtenerNombreCompleto() {
-        return this.nombres + " " + this.apellidoPaterno + " " + this.apellidoMaterno;
-    }
-
-    /**
-     * Método de utilidad para calcular la edad actual basada en la fecha de nacimiento.
-     */
-    public int calcularEdad() {
-        if (this.fechaNacimiento == null) return 0;
-
-        Calendar hoy = Calendar.getInstance();
-        Calendar nacimiento = Calendar.getInstance();
-        nacimiento.setTime(this.fechaNacimiento);
-
-        int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
-        if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
-            edad--;
-        }
-        return edad;
-    }
-
-    public boolean validarDni() {
-        // Lógica básica para verificar que el DNI tenga 8 dígitos
-        return this.dni != null && this.dni.length() == 8;
-    }
+	Recomendación en el BL: Asegúrate de que, en tu lógica de negocio, recortes los espacios 
+	con .trim() y valides que dni.length() == 8.
+	
+	
+	
+	*/
+	
+	
+	
+	
+	
+	
+	
 }

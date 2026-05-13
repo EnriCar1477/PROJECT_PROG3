@@ -1,82 +1,167 @@
 package pe.edu.pucp.kirusmile.dao.impl;
 
-import pe.edu.pucp.kirusmile.dao.EspecialidadDAO;
-import pe.edu.pucp.kirusmile.models.Especialidad;
+import pe.edu.pucp.kirusmile.dao.inter.EspecialidadDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
+import pe.edu.pucp.kirusmile.models.Especialidad;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EspecialidadDAOImpl implements EspecialidadDAO {
 
+    private Connection con;
+
+    public EspecialidadDAOImpl() {
+        this.con = DBManager.getInstance().getConnection();
+    }
+
     @Override
-    public Especialidad load(Integer id) {
-        String sql = "SELECT idEspecialidad, nombreEspecialidad, costoEspecialidad, activo FROM Especialidad WHERE idEspecialidad = ? AND activo = 1";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
+    public int save(Especialidad objeto) {
+        int idGenerado = 0;
+        String sql = "INSERT INTO Especialidad (nombre_especialidad, costo_especialidad, activo) VALUES (?, ?, ?)";
+
+        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pst.setString(1, objeto.getNombreEspecialidad());
+            pst.setDouble(2, objeto.getCostoEspecialidad());
+            pst.setBoolean(3, objeto.isActivo());
+
+            pst.executeUpdate();
+
+            try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return new Especialidad(rs.getInt(1), rs.getString(2), rs.getDouble(3), rs.getBoolean(4));
+                    idGenerado = rs.getInt(1);
+                    objeto.setIdEspecialidad(idGenerado);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al guardar Especialidad: " + e.getMessage());
         }
-        return null;
+        return idGenerado;
     }
 
     @Override
-    public Especialidad save(Especialidad t) {
-        t.setActivo(true);
-        String sql = "INSERT INTO Especialidad (nombreEspecialidad, costoEspecialidad, activo) VALUES (?, ?, ?)";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, t.getNombreEspecialidad());
-            ps.setDouble(2, t.getCostoEspecialidad());
-            ps.setBoolean(3, t.isActivo());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) t.setIdEspecialidad(rs.getInt(1));
+    public int update(Especialidad objeto) {
+        int filasAfectadas = 0;
+        String sql = "UPDATE Especialidad SET nombre_especialidad = ?, costo_especialidad = ?, activo = ? " +
+                "WHERE id_especialidad = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, objeto.getNombreEspecialidad());
+            pst.setDouble(2, objeto.getCostoEspecialidad());
+            pst.setBoolean(3, objeto.isActivo());
+            pst.setInt(4, objeto.getIdEspecialidad());
+
+            filasAfectadas = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar Especialidad: " + e.getMessage());
+        }
+        return filasAfectadas;
+    }
+
+    //usamos el borrado lógico! En lugar de un DELETE FROM, hacemos un UPDATE
+    @Override
+    public int delete(int id) {
+        int filasAfectadas = 0;
+        String sql = "UPDATE Especialidad SET activo = 0 WHERE id_especialidad = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            filasAfectadas = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al realizar borrado lógico de Especialidad: " + e.getMessage());
+        }
+        return filasAfectadas;
+    }
+
+    @Override
+    public Especialidad load(int id) {
+        Especialidad especialidad = null;
+        String sql = "SELECT * FROM Especialidad WHERE id_especialidad = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    especialidad = new Especialidad();
+                    especialidad.setIdEspecialidad(rs.getInt("id_especialidad"));
+                    especialidad.setNombreEspecialidad(rs.getString("nombre_especialidad"));
+                    especialidad.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
+                    especialidad.setActivo(rs.getBoolean("activo"));
+                }
             }
-            return t;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al cargar Especialidad: " + e.getMessage());
         }
-        return null;
+        return especialidad;
+    }
+
+    // Este método trae absolutamente todas (activas e inactivas) para el módulo de administración
+    @Override
+    public List<Especialidad> listALL() {
+        List<Especialidad> lista = new ArrayList<>();
+
+        String sql = "SELECT * FROM Especialidad ORDER BY nombre_especialidad ASC";
+
+        try (PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                Especialidad esp = new Especialidad();
+                esp.setIdEspecialidad(rs.getInt("id_especialidad"));
+                esp.setNombreEspecialidad(rs.getString("nombre_especialidad"));
+                esp.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
+                esp.setActivo(rs.getBoolean("activo"));
+                lista.add(esp);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar todas las Especialidades: " + e.getMessage());
+        }
+        return lista;
     }
 
     @Override
-    public Especialidad update(Especialidad t) {
-        String sql = "UPDATE Especialidad SET nombreEspecialidad=?, costoEspecialidad=?, activo=? WHERE idEspecialidad=?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, t.getNombreEspecialidad());
-            ps.setDouble(2, t.getCostoEspecialidad());
-            ps.setBoolean(3, t.isActivo());
-            ps.setInt(4, t.getIdEspecialidad());
-            ps.executeUpdate();
-            return t;
+    public Especialidad obtenerPorNombre(String nombreEspecialidad) {
+        Especialidad especialidad = null;
+        String sql = "SELECT * FROM Especialidad WHERE nombre_especialidad = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, nombreEspecialidad);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    especialidad = new Especialidad();
+                    especialidad.setIdEspecialidad(rs.getInt("id_especialidad"));
+                    especialidad.setNombreEspecialidad(rs.getString("nombre_especialidad"));
+                    especialidad.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
+                    especialidad.setActivo(rs.getBoolean("activo"));
+                }
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al obtener Especialidad por nombre: " + e.getMessage());
         }
-        return null;
+        return especialidad;
     }
 
     @Override
-    public void remove(Especialidad t) {
-        t.setActivo(false); // SOFT DELETE (Lógica)
-        String sql = "UPDATE Especialidad SET activo = ? WHERE idEspecialidad = ?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setBoolean(1, t.isActivo());
-            ps.setInt(2, t.getIdEspecialidad());
-            ps.executeUpdate();
+    public List<Especialidad> listarActivas() {
+        List<Especialidad> lista = new ArrayList<>();
+        // Este método trae solo las activas, ideal para llenar el ComboBox al registrar un nuevo Médico
+        String sql = "SELECT * FROM Especialidad WHERE activo = 1 ORDER BY nombre_especialidad ASC";
+
+        try (PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                Especialidad esp = new Especialidad();
+                esp.setIdEspecialidad(rs.getInt("id_especialidad"));
+                esp.setNombreEspecialidad(rs.getString("nombre_especialidad"));
+                esp.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
+                esp.setActivo(rs.getBoolean("activo"));
+                lista.add(esp);
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al listar Especialidades activas: " + e.getMessage());
         }
+        return lista;
     }
 }

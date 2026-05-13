@@ -1,90 +1,121 @@
 package pe.edu.pucp.kirusmile.dao.impl;
 
-import pe.edu.pucp.kirusmile.dao.AnamnesisDAO;
-import pe.edu.pucp.kirusmile.models.Anamnesis;
+import pe.edu.pucp.kirusmile.dao.inter.AnamnesisDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
+import pe.edu.pucp.kirusmile.models.Anamnesis;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.List;
 
 public class AnamnesisDAOImpl implements AnamnesisDAO {
 
+    private Connection con;
+
+    public AnamnesisDAOImpl() {
+        this.con = DBManager.getInstance().getConnection();
+    }
+
     @Override
-    public Anamnesis load(Integer id) {
-        String sql = "SELECT idAnamnesis, motivoPrincipal, tiempoEnfermedad, formaInicio, relatoClinico, antecedentesImportantes, desactivado FROM Anamnesis WHERE idAnamnesis = ? AND desactivado = 0";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
+    public int save(Anamnesis objeto) {
+
+        int idGenerado = 0;
+        String sql = "INSERT INTO Anamnesis (fid_detalle, motivo_principal, tiempo_enfermedad, " +
+                "forma_inicio, relato_clinico, antecedentes_importantes) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            // El idAnamnesis (PK de Java) actúa como el fid_detalle (FK de SQL) en esta relación 1:1
+            pst.setInt(1, objeto.getDetalleHistorial().getIdDetalle());
+            pst.setString(2, objeto.getMotivoPrincipal());
+            pst.setString(3, objeto.getTiempoEnfermedad());
+            pst.setString(4, objeto.getFormaInicio());
+            pst.setString(5, objeto.getRelatoClinico());
+            pst.setString(6, objeto.getAntecedentesImportantes());
+
+            pst.executeUpdate();
+
+            try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return new Anamnesis(
-                        rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getBoolean(7)
-                    );
+                    idGenerado = rs.getInt(1);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al guardar Anamnesis: " + e.getMessage());
         }
-        return null;
+        return idGenerado;
     }
 
     @Override
-    public Anamnesis save(Anamnesis t) {
-        t.setDesactivado(false);
-        String sql = "INSERT INTO Anamnesis (motivoPrincipal, tiempoEnfermedad, formaInicio, relatoClinico, antecedentesImportantes, desactivado) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, t.getMotivoPrincipal());
-            ps.setString(2, t.getTiempoEnfermedad());
-            ps.setString(3, t.getFormaInicio());
-            ps.setString(4, t.getRelatoClinico());
-            ps.setString(5, t.getAntecedentesImportantes());
-            ps.setBoolean(6, t.getDesactivado());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) t.setIdAnamnesis(rs.getInt(1));
+    public int update(Anamnesis objeto) {
+        int filasAfectadas = 0;
+        String sql = "UPDATE Anamnesis SET motivo_principal = ?, tiempo_enfermedad = ?, " +
+                "forma_inicio = ?, relato_clinico = ?, antecedentes_importantes = ? " +
+                "WHERE id_anamnesis = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, objeto.getMotivoPrincipal());
+            pst.setString(2, objeto.getTiempoEnfermedad());
+            pst.setString(3, objeto.getFormaInicio());
+            pst.setString(4, objeto.getRelatoClinico());
+            pst.setString(5, objeto.getAntecedentesImportantes());
+            pst.setInt(6, objeto.getIdAnamnesis());
+
+            filasAfectadas = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar Anamnesis: " + e.getMessage());
+        }
+        return filasAfectadas;
+    }
+
+    // Bloqueado: La anamnesis es un documento legal histórico
+    @Override
+    public int delete(int id) {
+        return 0;
+    }
+
+    @Override
+    public Anamnesis load(int id) {
+        Anamnesis anamnesis = null;
+        String sql = "SELECT * FROM Anamnesis WHERE id_anamnesis = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    anamnesis = new Anamnesis();
+                    anamnesis.setIdAnamnesis(rs.getInt("id_anamnesis"));
+                    // fid_detalle no se mapea al objeto Java porque no existe ese campo en la clase
+                    anamnesis.setMotivoPrincipal(rs.getString("motivo_principal"));
+                    anamnesis.setTiempoEnfermedad(rs.getString("tiempo_enfermedad"));
+                    anamnesis.setFormaInicio(rs.getString("forma_inicio"));
+                    anamnesis.setRelatoClinico(rs.getString("relato_clinico"));
+                    anamnesis.setAntecedentesImportantes(rs.getString("antecedentes_importantes"));
+                }
             }
-            return t;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al cargar Anamnesis: " + e.getMessage());
         }
-        return null;
+        return anamnesis;
+    }
+
+    // No tiene sentido listar anamnesis de forma masiva por ahora
+    @Override
+    public List<Anamnesis> listALL() {
+        return List.of();
     }
 
     @Override
-    public Anamnesis update(Anamnesis t) {
-        String sql = "UPDATE Anamnesis SET motivoPrincipal=?, tiempoEnfermedad=?, formaInicio=?, relatoClinico=?, antecedentesImportantes=?, desactivado=? WHERE idAnamnesis=?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, t.getMotivoPrincipal());
-            ps.setString(2, t.getTiempoEnfermedad());
-            ps.setString(3, t.getFormaInicio());
-            ps.setString(4, t.getRelatoClinico());
-            ps.setString(5, t.getAntecedentesImportantes());
-            ps.setBoolean(6, t.getDesactivado());
-            ps.setInt(7, t.getIdAnamnesis());
-            ps.executeUpdate();
-            return t;
+    public Anamnesis obtenerPorFidDetalle(int fid_detalle) {
+        String sql = "SELECT id_anamnesis FROM Anamnesis WHERE fid_detalle = ?";
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, fid_detalle);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return load(rs.getInt(1)); // Reutilizamos el load
+                }
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error en obtenerPorFidDetalle: " + e.getMessage());
         }
         return null;
-    }
-
-    @Override
-    public void remove(Anamnesis t) {
-        t.setDesactivado(true);
-        String sql = "UPDATE Anamnesis SET desactivado = ? WHERE idAnamnesis = ?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setBoolean(1, t.getDesactivado());
-            ps.setInt(2, t.getIdAnamnesis());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 }

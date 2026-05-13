@@ -1,94 +1,131 @@
 package pe.edu.pucp.kirusmile.dao.impl;
 
-import pe.edu.pucp.kirusmile.dao.HorarioDisponibilidadDAO;
-import pe.edu.pucp.kirusmile.models.HorarioDisponibilidad;
+import pe.edu.pucp.kirusmile.dao.inter.HorarioDisponibilidadDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
+import pe.edu.pucp.kirusmile.models.HorarioDisponibilidad;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
+    private Connection con;
+
+    public HorarioDisponibilidadDAOImpl() {
+        this.con = DBManager.getInstance().getConnection();
+    }
 
     @Override
-    public HorarioDisponibilidad load(Integer id) {
-        String sql = "SELECT idHorario, fechaEspecifica, horaInicio, horaFin, estado FROM HorarioDisponibilidad WHERE idHorario = ? AND estado != 'INACTIVO'";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
+    public int save(HorarioDisponibilidad objeto) {
+        int idGenerado = 0;
+        // Usamos fid_medico tal como definimos en el script SQL
+        String sql = "INSERT INTO HorarioDisponibilidad (fid_medico, fecha_especifica, " +
+                "hora_inicio, hora_fin, activo) VALUES (?, ?, ?, ?, 1)";
+
+        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            // 1. Vinculamos con el médico (Asumiendo que el objeto tiene la referencia)
+            pst.setInt(1, objeto.getMedico().getIdMedico());
+
+            // 2. Mapeo de LocalDate a java.sql.Date
+            pst.setDate(2, java.sql.Date.valueOf(objeto.getFechaEspecifica()));
+
+            // 3. Mapeo de LocalTime a java.sql.Time (Manejo de horas en JDBC)
+            pst.setTime(3, java.sql.Time.valueOf(objeto.getHoraInicio()));
+            pst.setTime(4, java.sql.Time.valueOf(objeto.getHoraFin()));
+
+            pst.executeUpdate();
+
+            try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return new HorarioDisponibilidad(
-                        rs.getInt(1), rs.getDate(2),
-                        rs.getTime(3) != null ? rs.getTime(3).toLocalTime() : null,
-                        rs.getTime(4) != null ? rs.getTime(4).toLocalTime() : null,
-                        rs.getString(5)
-                    );
+                    idGenerado = rs.getInt(1);
+                    objeto.setIdHorario(idGenerado);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al guardar Horario: " + e.getMessage());
         }
-        return null;
+        return idGenerado;
     }
 
     @Override
-    public HorarioDisponibilidad save(HorarioDisponibilidad t) {
-        String sql = "INSERT INTO HorarioDisponibilidad (fechaEspecifica, horaInicio, horaFin, estado) VALUES (?, ?, ?, ?)";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            if(t.getFechaEspecifica() != null) ps.setDate(1, new java.sql.Date(t.getFechaEspecifica().getTime()));
-            else ps.setNull(1, java.sql.Types.DATE);
-            if(t.getHoraInicio() != null) ps.setTime(2, java.sql.Time.valueOf(t.getHoraInicio()));
-            else ps.setNull(2, java.sql.Types.TIME);
-            if(t.getHoraFin() != null) ps.setTime(3, java.sql.Time.valueOf(t.getHoraFin()));
-            else ps.setNull(3, java.sql.Types.TIME);
-            ps.setString(4, t.getEstado());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) t.setIdHorario(rs.getInt(1));
+    public int update(HorarioDisponibilidad objeto) {
+        int filasAfectadas = 0;
+        String sql = "UPDATE HorarioDisponibilidad SET fecha_especifica = ?, hora_inicio = ?, " +
+                "hora_fin = ? WHERE id_horario = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setDate(1, java.sql.Date.valueOf(objeto.getFechaEspecifica()));
+            pst.setTime(2, java.sql.Time.valueOf(objeto.getHoraInicio()));
+            pst.setTime(3, java.sql.Time.valueOf(objeto.getHoraFin()));
+            pst.setInt(4, objeto.getIdHorario());
+
+            filasAfectadas = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar Horario: " + e.getMessage());
+        }
+        return filasAfectadas;
+    }
+
+    @Override
+    public int delete(int id) {
+        int filasAfectadas = 0;
+        // Aplicamos borrado lógico (activo = 0) para no romper citas pasadas
+        String sql = "UPDATE HorarioDisponibilidad SET activo = 0 WHERE id_horario = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            filasAfectadas = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error en borrado lógico de Horario: " + e.getMessage());
+        }
+        return filasAfectadas;
+    }
+
+    @Override
+    public HorarioDisponibilidad load(int id) {
+        HorarioDisponibilidad horario = null;
+        String sql = "SELECT * FROM HorarioDisponibilidad WHERE id_horario = ? AND activo = 1";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    horario = new HorarioDisponibilidad();
+                    horario.setIdHorario(rs.getInt("id_horario"));
+                    horario.setFechaEspecifica(rs.getDate("fecha_especifica").toLocalDate());
+                    horario.setHoraInicio(rs.getTime("hora_inicio").toLocalTime());
+                    horario.setHoraFin(rs.getTime("hora_fin").toLocalTime());
+                }
             }
-            return t;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al cargar Horario: " + e.getMessage());
         }
-        return null;
+        return horario;
+    }
+
+    // No se usa listar todos los horarios de todos los médicos a la vez
+    @Override
+    public List<HorarioDisponibilidad> listALL() {
+        return List.of();
     }
 
     @Override
-    public HorarioDisponibilidad update(HorarioDisponibilidad t) {
-        String sql = "UPDATE HorarioDisponibilidad SET fechaEspecifica=?, horaInicio=?, horaFin=?, estado=? WHERE idHorario=?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            if(t.getFechaEspecifica() != null) ps.setDate(1, new java.sql.Date(t.getFechaEspecifica().getTime()));
-            else ps.setNull(1, java.sql.Types.DATE);
-            if(t.getHoraInicio() != null) ps.setTime(2, java.sql.Time.valueOf(t.getHoraInicio()));
-            else ps.setNull(2, java.sql.Types.TIME);
-            if(t.getHoraFin() != null) ps.setTime(3, java.sql.Time.valueOf(t.getHoraFin()));
-            else ps.setNull(3, java.sql.Types.TIME);
-            ps.setString(4, t.getEstado());
-            ps.setInt(5, t.getIdHorario());
-            ps.executeUpdate();
-            return t;
+    public List<HorarioDisponibilidad> listarPorFidMedico(int fid_medico) {
+        List<HorarioDisponibilidad> lista = new ArrayList<>();
+        String sql = "SELECT id_horario FROM HorarioDisponibilidad WHERE fid_medico = ? " +
+                "AND activo = 1 ORDER BY fecha_especifica ASC, hora_inicio ASC";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, fid_medico);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(this.load(rs.getInt(1)));
+                }
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al listar horarios por médico: " + e.getMessage());
         }
-        return null;
+        return lista;
     }
 
-    @Override
-    public void remove(HorarioDisponibilidad t) {
-        t.setEstado("INACTIVO"); // SOFT DELETE (Lógica)
-        String sql = "UPDATE HorarioDisponibilidad SET estado = ? WHERE idHorario = ?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, t.getEstado());
-            ps.setInt(2, t.getIdHorario());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }

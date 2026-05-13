@@ -3,6 +3,8 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/AppPrueba/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/AppPrueba/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Meditrack_BL/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Meditrack_BL/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Meditrack_DBManager/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Meditrack_DBManager/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Meditrack_dao/src/main/java" charset="UTF-8" />

@@ -1,17 +1,25 @@
 package pe.edu.pucp.kirusmile.models;
 
 public class Especialidad {
-    private int idEspecialidad;
+    // --- ATRIBUTOS ---
+    private int idEspecialidad;         // ID como tipo primitivo int
     private String nombreEspecialidad;
     private double costoEspecialidad;
-    private boolean activo;
+    private boolean activo;             // Flag para borrado lógico administrativo
 
-    public Especialidad(int idEspecialidad, String nombreEspecialidad, double costoEspecialidad, boolean activo) {
-        this.idEspecialidad = idEspecialidad;
+    // --- CONSTRUCTORES ---
+    public Especialidad() {
+        this.activo = true; // Toda especialidad nueva nace activa por defecto
+    }
+
+    public Especialidad(String nombreEspecialidad, double costoEspecialidad) {
         this.nombreEspecialidad = nombreEspecialidad;
         this.costoEspecialidad = costoEspecialidad;
-        this.activo = activo;
+        this.activo = true;
     }
+
+    // --- GETTERS Y SETTERS ---
+
 
     public int getIdEspecialidad() {
         return idEspecialidad;
@@ -44,8 +52,4 @@ public class Especialidad {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
-
-    /*public double obtenerCostoBase(){
-
-    }*/
 }

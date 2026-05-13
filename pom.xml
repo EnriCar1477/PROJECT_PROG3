@@ -9,6 +9,7 @@
         <module>Meditrack_model</module>
         <module>Meditrack_DBManager</module>
         <module>Meditrack_dao</module>
+        <module>Meditrack_BL</module>
     </modules>
     <groupId>pe.edu.pucp.kirusmile</groupId>
     <artifactId>TareaAcad</artifactId>

@@ -1,38 +1,49 @@
 package pe.edu.pucp.kirusmile.models;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class Medico extends Empleado {
-	private String cmp;
-	private String rne;
-	private Especialidad especialidad;
-	private Date fechaIngreso;
-	private String firmaDigital;
-	private List<HorarioDisponibilidad> listaHorarios;
-	private boolean desactivado;
+	// --- ATRIBUTOS PROPIOS ---
+	private int idMedico;
+	private String cmp;                // Colegio Médico del Perú
+	private String rne;                // Registro Nacional de Especialista
+	private LocalDate fechaIngreso;    // Usamos LocalDate para fechas de calendario
+	private String firmaDigital;       // Ruta o representación de la firma
 
-	public Medico(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento,
-			String telefono, String correo, String codigoEmpleado, Date fechaVinculacion,
-			String cmp, String rne, Especialidad especialidad, Date fechaIngreso,
-			String firmaDigital, List<HorarioDisponibilidad> listaHorarios, boolean desactivado) {
-		super(dni, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, correo, codigoEmpleado,
-				fechaVinculacion);
+
+	// --- RELACIONES ---
+	private Especialidad especialidad; // Un médico tiene una especialidad principal
+	private List<HorarioDisponibilidad> listaHorarios;
+
+	// --- CONSTRUCTORES ---
+	public Medico() {
+		super(); // Llama al constructor de Empleado
+		this.listaHorarios = new ArrayList<>();
+	}
+
+	public Medico(String cmp, String rne, Especialidad especialidad,
+	              LocalDate fechaIngreso, String firmaDigital) {
+		super();
 		this.cmp = cmp;
 		this.rne = rne;
 		this.especialidad = especialidad;
 		this.fechaIngreso = fechaIngreso;
 		this.firmaDigital = firmaDigital;
-		this.listaHorarios = listaHorarios;
-		this.desactivado = desactivado;
+		this.listaHorarios = new ArrayList<>();
 	}
 
-	public boolean getDesactivado() {
-		return desactivado;
+	// --- GETTERS Y SETTERS ---
+
+
+	public int getIdMedico() {
+		return idMedico;
 	}
 
-	public void setDesactivado(boolean desactivado) {
-		this.desactivado = desactivado;
+	public void setIdMedico(int idMedico) {
+		this.idMedico = idMedico;
 	}
 
 	public String getCmp() {
@@ -51,19 +62,11 @@ public class Medico extends Empleado {
 		this.rne = rne;
 	}
 
-	public Especialidad getEspecialidad() {
-		return especialidad;
-	}
-
-	public void setEspecialidad(Especialidad especialidad) {
-		this.especialidad = especialidad;
-	}
-
-	public Date getFechaIngreso() {
+	public LocalDate getFechaIngreso() {
 		return fechaIngreso;
 	}
 
-	public void setFechaIngreso(Date fechaIngreso) {
+	public void setFechaIngreso(LocalDate fechaIngreso) {
 		this.fechaIngreso = fechaIngreso;
 	}
 
@@ -75,6 +78,14 @@ public class Medico extends Empleado {
 		this.firmaDigital = firmaDigital;
 	}
 
+	public Especialidad getEspecialidad() {
+		return especialidad;
+	}
+
+	public void setEspecialidad(Especialidad especialidad) {
+		this.especialidad = especialidad;
+	}
+
 	public List<HorarioDisponibilidad> getListaHorarios() {
 		return listaHorarios;
 	}
@@ -82,15 +93,27 @@ public class Medico extends Empleado {
 	public void setListaHorarios(List<HorarioDisponibilidad> listaHorarios) {
 		this.listaHorarios = listaHorarios;
 	}
+	
+	
+	/*
+	Sobre la firmaDigital en Medico.java
 
-	public void registrarCredenciales(String cmp, String rne, Especialidad especialidad) {
+	Observación: Tienes private String firmaDigital;.
 
-	}
+	Recomendación: Esto está perfecto, pero tenlo en cuenta al crear tu base de datos MySQL. 
+	Si vas a guardar la firma como un link o ruta de una imagen (ej. "/imagenes/firmas/medico1.png"), 
+	un VARCHAR(255) está bien. Pero si decides guardar la firma convertida a código puro (formato Base64), 
+	deberás usar un tipo LONGTEXT en MySQL porque esos textos son larguísimos.
+	
+	Sobre las Listas Vacías en Medico.java
+	
+	Observación: En ambos constructores tienes this.listaHorarios = new ArrayList<>();.
 
-	/* public boolean validarEspecialidad(){} */
-	public void actualizarFirmarDigital(String nuevoToken) {
-		this.setFirmaDigital(firmaDigital);
-	}
-
-	/* public double obtenerTarifaConsulta(){} */
+	Recomendación: ¡Excelente! Solo recuerda hacer lo mismo si en el futuro agregas nuevas listas 
+	en otras clases. Instanciar la lista vacía evita que el sistema se caiga (NullPointerException) 
+	si intentas contar los horarios de un médico nuevo.
+	
+	*/
+	
+	
 }

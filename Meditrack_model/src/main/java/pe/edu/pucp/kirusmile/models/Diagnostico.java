@@ -3,24 +3,39 @@ package pe.edu.pucp.kirusmile.models;
 import java.time.LocalDateTime;
 
 public class Diagnostico {
-    private Integer idDiagnostico;
-	private String tipo;
+    // --- ATRIBUTOS PROPIOS ---
+    private int idDiagnostico;
+    private String tipo;                  // Ej: "PRESUNTIVO" o "DEFINITIVO"
     private String observaciones;
-    private EnfermedadCIE10 enfermedadPrincial;
-    private LocalDateTime fechaHoraRegistro;
-    private boolean desactivado;
+    private LocalDateTime fechaHoraRegistro; // Mapeado de DateTime a LocalDateTime
 
-    public Diagnostico(Integer idDiagnostico, String tipo, String observaciones, EnfermedadCIE10 enfermedadPrincial, LocalDateTime fechaHoraRegistro, boolean desactivado) {
-        this.idDiagnostico = idDiagnostico;
-        this.tipo = tipo;
-        this.observaciones = observaciones;
-        this.enfermedadPrincial = enfermedadPrincial;
-        this.fechaHoraRegistro = fechaHoraRegistro;
-        this.desactivado = desactivado;
+    // --- RELACIONES ---
+    private EnfermedadCIE10 enfermedadBase;  // Asociación con el catálogo de la OMS
+    private DetalleHistorial detalleHistorial;
+    // --- CONSTRUCTORES ---
+    public Diagnostico() {
+        // Truco pro: Cuando se crea un diagnóstico en Java, capturamos automáticamente el instante exacto
+        this.fechaHoraRegistro = LocalDateTime.now();
     }
 
-    public Integer getIdDiagnostico() { return idDiagnostico; }
-    public void setIdDiagnostico(Integer idDiagnostico) { this.idDiagnostico = idDiagnostico; }
+    public Diagnostico(String tipo, String observaciones, EnfermedadCIE10 enfermedadBase) {
+        this.tipo = tipo;
+        this.observaciones = observaciones;
+        this.enfermedadBase = enfermedadBase;
+        // Capturamos el instante exacto en que el doctor hizo el diagnóstico
+        this.fechaHoraRegistro = LocalDateTime.now();
+    }
+
+    // --- GETTERS Y SETTERS ---
+
+
+    public int getIdDiagnostico() {
+        return idDiagnostico;
+    }
+
+    public void setIdDiagnostico(int idDiagnostico) {
+        this.idDiagnostico = idDiagnostico;
+    }
 
     public String getTipo() {
         return tipo;
@@ -38,14 +53,6 @@ public class Diagnostico {
         this.observaciones = observaciones;
     }
 
-    public EnfermedadCIE10 getEnfermedadPrincial() {
-        return enfermedadPrincial;
-    }
-
-    public void setEnfermedadPrincial(EnfermedadCIE10 enfermedadPrincial) {
-        this.enfermedadPrincial = enfermedadPrincial;
-    }
-
     public LocalDateTime getFechaHoraRegistro() {
         return fechaHoraRegistro;
     }
@@ -54,6 +61,32 @@ public class Diagnostico {
         this.fechaHoraRegistro = fechaHoraRegistro;
     }
 
-    public boolean getDesactivado() { return desactivado; }
-    public void setDesactivado(boolean desactivado) { this.desactivado = desactivado; }
+    public EnfermedadCIE10 getEnfermedadBase() {
+        return enfermedadBase;
+    }
+
+    public void setEnfermedadBase(EnfermedadCIE10 enfermedadBase) {
+        this.enfermedadBase = enfermedadBase;
+    }
+
+    public DetalleHistorial getDetalleHistorial() {
+        return detalleHistorial;
+    }
+
+    public void setDetalleHistorial(DetalleHistorial detalleHistorial) {
+        this.detalleHistorial = detalleHistorial;
+    }
+	
+	
+	/*
+	
+		Tienes private String tipo; // Ej: "PRESUNTIVO" o "DEFINITIVO"
+		Como solo hay dos opciones reales en medicina, sería ideal convertirlo en un Enum (así como hiciste con EstadoCita).
+
+		Sugerencia: Crea un public enum TipoDiagnostico { PRESUNTIVO, DEFINITIVO } y úsalo aquí. 
+		Esto evita que alguien escriba "Presunto" o "Definitiboo" por error.
+	
+	*/
+	
+	
 }

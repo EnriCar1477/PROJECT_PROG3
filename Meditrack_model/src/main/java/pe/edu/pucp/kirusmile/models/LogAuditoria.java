@@ -5,29 +5,50 @@ import java.time.format.DateTimeFormatter;
 
 public class LogAuditoria {
 
-    // --- ATRIBUTOS ---
-    private int idLog;
-    private LocalDateTime fechaHora;
-    private String accionRealizada;
-    private String ipTerminal;
+    // --- ATRIBUTOS PROPIOS ---
+    private int idLogAuditoria;
+    private LocalDateTime fechaHora;     // Usamos LocalDateTime para tener la estampa de tiempo exacta
+    private String accionRealizada;      // Ej: "Login exitoso", "Registro de nueva cita ID 5"
+    private String ipTerminal;           // Ej: "192.168.1.15"
 
-    // --- GETTERS Y SETTERS INTERCALADOS ---
+    private Empleado empleado;
 
-    public int getIdLog() {
-        return idLog;
+    // --- CONSTRUCTORES ---
+    public LogAuditoria() {
+        // Truco pro: El log captura automáticamente el instante en que ocurrió el evento
+        this.fechaHora = LocalDateTime.now();
     }
-    public void setIdLog(int idLog) {
-        this.idLog = idLog;
+
+    public LogAuditoria(String accionRealizada, String ipTerminal) {
+        this.accionRealizada = accionRealizada;
+        this.ipTerminal = ipTerminal;
+        // Capturamos el instante exacto automáticamente para evitar manipulaciones
+        this.fechaHora = LocalDateTime.now();
+    }
+
+    // --- GETTERS Y SETTERS ---
+
+
+    public int getIdLogAuditoria() {
+        return idLogAuditoria;
+    }
+
+    public void setIdLogAuditoria(int idLogAuditoria) {
+        this.idLogAuditoria = idLogAuditoria;
     }
 
     public LocalDateTime getFechaHora() {
         return fechaHora;
     }
-    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
+
+    public void setFechaHora(LocalDateTime fechaHora) {
+        this.fechaHora = fechaHora;
+    }
 
     public String getAccionRealizada() {
         return accionRealizada;
     }
+
     public void setAccionRealizada(String accionRealizada) {
         this.accionRealizada = accionRealizada;
     }
@@ -35,53 +56,42 @@ public class LogAuditoria {
     public String getIpTerminal() {
         return ipTerminal;
     }
+
     public void setIpTerminal(String ipTerminal) {
         this.ipTerminal = ipTerminal;
     }
 
-    // --- CONSTRUCTORES ---
-
-    public LogAuditoria() {
-        // Constructor vacío
+    public Empleado getEmpleado() {
+        return empleado;
     }
 
-    public LogAuditoria(String accionRealizada, String ipTerminal) {
-        this.idLog = (int) (Math.random() * 10000); // Simulando generación de ID en base de datos
-        this.fechaHora = LocalDateTime.now(); // Captura el momento exacto e inalterable
-        this.accionRealizada = accionRealizada;
-        this.ipTerminal = ipTerminal;
+    public void setEmpleado(Empleado empleado) {
+        this.empleado = empleado;
     }
+	
+	/*
+	
+	Sobre la Inmutabilidad en LogAuditoria.java
+	
+	Observación: Tienes métodos Setters para fechaHora, accionRealizada y ipTerminal.
 
-    // --- MÉTODOS ---
-
-    /**
-     * Registra una nueva acción en el sistema capturando el momento exacto.
-     * Este método es vital para rastrear quién hizo qué (ej. "Secretaria canceló cita").
-     */
-    public void registrarAccion(String accion, String ip) {
-        if (accion == null || accion.trim().isEmpty()) {
-            throw new IllegalArgumentException("La acción a auditar no puede estar vacía.");
-        }
-        
-        this.fechaHora = LocalDateTime.now();
-        this.accionRealizada = accion;
-        this.ipTerminal = ip;
-        
-        System.out.println("Log registrado: " + obtenerResumenLog());
-    }
-
-    /**
-     * Genera una cadena de texto formateada con el resumen del evento 
-     * ideal para ser exportado a un reporte de seguridad o consola.
-     */
-    public String obtenerResumenLog() {
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        String fechaFormateada = (this.fechaHora != null) ? this.fechaHora.format(formato) : "Desconocida";
-        
-        return String.format("[LOG-%04d] %s | IP: %s | Acción: %s", 
-                this.idLog, 
-                fechaFormateada, 
-                (this.ipTerminal != null ? this.ipTerminal : "Desconocida"), 
-                this.accionRealizada);
-    }
+	Recomendación Experta: Como hablamos antes, un Log de Auditoría jamás debe modificarse. 
+	Para ser 100% estrictos con la seguridad, podrías borrar los métodos set de esta clase. 
+	De esa forma, obligas a que los datos solo nazcan a través del constructor y el propio lenguaje 
+	Java bloqueará cualquier intento de alterarlos en el futuro. (Nota: Si tu framework o DAO te exige 
+	tener setters para sacar los datos de la base de datos, déjalos, pero ten cuidado de no usarlos en el BL).
+	
+	
+	
+	
+	
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
 }

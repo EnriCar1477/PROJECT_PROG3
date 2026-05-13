@@ -1,29 +1,38 @@
 package pe.edu.pucp.kirusmile.models;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Tratamiento{//TRATAMIENTO
-    private Integer idTratamiento;
-    private TipoTratamiento tipo;
-    private String indicaciones;
-    private Date fechaInicio;
-    private Date fechaFin;
-    private boolean desactivado;
 
-    public Tratamiento(Integer idTratamiento, TipoTratamiento tipo, String indicaciones, Date fechaInicio, Date fechaFin,boolean desactivado) {
-        this.idTratamiento = idTratamiento;
+    // --- ATRIBUTOS PROPIOS ---
+    private int idTratamiento;         // ID como tipo primitivo int
+    private TipoTratamiento tipo;      // Uso del Enum de Java
+    private String indicaciones;       // Ej: "Tomar Paracetamol cada 8 horas"
+    private LocalDate fechaInicio;     // Usamos LocalDate (solo fecha, sin hora)
+    private LocalDate fechaFin;        // Usamos LocalDate (solo fecha, sin hora)
+
+    private DetalleHistorial detalleHistorial;
+
+    // --- CONSTRUCTORES ---
+    public Tratamiento() {
+    }
+
+    public Tratamiento(TipoTratamiento tipo, String indicaciones, LocalDate fechaInicio, LocalDate fechaFin) {
         this.tipo = tipo;
         this.indicaciones = indicaciones;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
-        this.desactivado=desactivado;
     }
 
-    public Integer getIdTratamiento() {
+    // --- GETTERS Y SETTERS ---
+
+
+    public int getIdTratamiento() {
         return idTratamiento;
     }
 
-    public void setIdTratamiento(Integer idTratamiento) {
+    public void setIdTratamiento(int idTratamiento) {
         this.idTratamiento = idTratamiento;
     }
 
@@ -43,28 +52,28 @@ public class Tratamiento{//TRATAMIENTO
         this.indicaciones = indicaciones;
     }
 
-    public Date getFechaInicio() {
+    public LocalDate getFechaInicio() {
         return fechaInicio;
     }
 
-    public void setFechaInicio(Date fechaInicio) {
+    public void setFechaInicio(LocalDate fechaInicio) {
         this.fechaInicio = fechaInicio;
     }
 
-    public Date getFechaFin() {
+    public LocalDate getFechaFin() {
         return fechaFin;
     }
 
-    public void setFechaFin(Date fechaFin) {
+    public void setFechaFin(LocalDate fechaFin) {
         this.fechaFin = fechaFin;
     }
 
-    public boolean getDesactivado() {
-        return desactivado;
+    public DetalleHistorial getDetalleHistorial() {
+        return detalleHistorial;
     }
 
-    public void setDesactivado(boolean desactivado) {
-        this.desactivado = desactivado;
+    public void setDetalleHistorial(DetalleHistorial detalleHistorial) {
+        this.detalleHistorial = detalleHistorial;
     }
 }
 

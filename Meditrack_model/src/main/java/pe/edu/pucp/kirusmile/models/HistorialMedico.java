@@ -1,31 +1,39 @@
 package pe.edu.pucp.kirusmile.models;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
 public class HistorialMedico {
-	private int idHistorial;
-	private String observaciones;
-	private Paciente paciente;
-	private List<DetalleHistorial> listaDetalles;
 
+	// --- ATRIBUTOS PROPIOS
+	private int idHistorial;
+	private LocalDateTime fechaCreacion;
+	private String estadoFisico;
+
+
+	// --- ATRIBUTOS DE RELACIÓN
+	private List<DetalleHistorial> listaDetalles;
+	private Paciente paciente;
+
+
+	// --- CONSTRUCTORES ---
 	public HistorialMedico() {
-		// Constructor vacío
+		// Vital: Inicializamos la lista para evitar NullPointerException al crear un historial nuevo
 		this.listaDetalles = new ArrayList<>();
 	}
 
-	public HistorialMedico(int idHistorial, String observaciones, Paciente paciente,
-			List<DetalleHistorial> listaDetalles) {
-		this.idHistorial = idHistorial;// por default NINGUNO
-		this.observaciones = observaciones;
+	public HistorialMedico(LocalDateTime fechaCreacion, String estadoFisico, List<DetalleHistorial> listaDetalles, Paciente paciente) {
+		this.fechaCreacion = fechaCreacion;
+		this.estadoFisico = estadoFisico;
+		this.listaDetalles = listaDetalles;
 		this.paciente = paciente;
-		this.listaDetalles = new ArrayList<DetalleHistorial>();
-
 	}
 
-	// getters y setters
+	// --- GETTERS Y SETTERS ---
 
-	public int getIdHostorial() {
+
+	public int getIdHistorial() {
 		return idHistorial;
 	}
 
@@ -33,12 +41,28 @@ public class HistorialMedico {
 		this.idHistorial = idHistorial;
 	}
 
-	public String getObservaciones() {
-		return observaciones;
+	public LocalDateTime getFechaCreacion() {
+		return fechaCreacion;
 	}
 
-	public void setObservaciones(String observaciones) {
-		this.observaciones = observaciones;
+	public void setFechaCreacion(LocalDateTime fechaCreacion) {
+		this.fechaCreacion = fechaCreacion;
+	}
+
+	public String getEstadoFisico() {
+		return estadoFisico;
+	}
+
+	public void setEstadoFisico(String estadoFisico) {
+		this.estadoFisico = estadoFisico;
+	}
+
+	public List<DetalleHistorial> getListaDetalles() {
+		return listaDetalles;
+	}
+
+	public void setListaDetalles(List<DetalleHistorial> listaDetalles) {
+		this.listaDetalles = listaDetalles;
 	}
 
 	public Paciente getPaciente() {
@@ -49,29 +73,5 @@ public class HistorialMedico {
 		this.paciente = paciente;
 	}
 
-	public void agregarDetalle() {
-
-	}
-
-	public void actualizarObservaciones() {
-
-	}
-
-	public void verHistorialMedico() {
-		// Pero no hay información del historial médico aquí...
-	}
-
-	// Agregué algunos más
-
-	/*
-	 * public void agregarDiagnostico(pe.edu.pucp.kirusmile.models.Diagnostico
-	 * diagnostico){
-	 * // listaDiagnosticos.add(diagnostico);
-	 * }
-	 * 
-	 * public void agregarReceta(Receta receta){
-	 * // listaRecetas.add(receta);
-	 * }
-	 */
 
 }

@@ -1,22 +1,33 @@
 package pe.edu.pucp.kirusmile.models;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 
 public class HorarioDisponibilidad {
+    // --- ATRIBUTOS PROPIOS ---
     private int idHorario;
-    private Date fechaEspecifica;
-    private LocalTime horaInicio;
-    private LocalTime horaFin;
-    private String estado;
+    private LocalDate fechaEspecifica; // Mapeado a LocalDate por ser fecha sin hora
+    private LocalTime horaInicio;      // Mapea perfectamente con TIME en MySQL
+    private LocalTime horaFin;         // Mapea perfectamente con TIME en MySQL
+    private boolean activo;            // Borrado lógico para turnos cancelados
 
-    public HorarioDisponibilidad(int idHorario, Date fechaEspecifica, LocalTime horaInicio, LocalTime horaFin, String estado) {
-        this.idHorario = idHorario;
+    private Medico medico;
+
+    // --- CONSTRUCTORES ---
+    public HorarioDisponibilidad() {
+        this.activo = true; // Por defecto el horario nace disponible
+    }
+
+    public HorarioDisponibilidad(LocalDate fechaEspecifica, LocalTime horaInicio, LocalTime horaFin) {
         this.fechaEspecifica = fechaEspecifica;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
-        this.estado = estado;
+        this.activo = true;
     }
+
+    // --- GETTERS Y SETTERS ---
+
 
     public int getIdHorario() {
         return idHorario;
@@ -26,11 +37,11 @@ public class HorarioDisponibilidad {
         this.idHorario = idHorario;
     }
 
-    public Date getFechaEspecifica() {
+    public LocalDate getFechaEspecifica() {
         return fechaEspecifica;
     }
 
-    public void setFechaEspecifica(Date fechaEspecifica) {
+    public void setFechaEspecifica(LocalDate fechaEspecifica) {
         this.fechaEspecifica = fechaEspecifica;
     }
 
@@ -50,18 +61,19 @@ public class HorarioDisponibilidad {
         this.horaFin = horaFin;
     }
 
-    public String getEstado() {
-        return estado;
+    public boolean isActivo() {
+        return activo;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
-    public void marcarComoOcupado(){
-
+    public Medico getMedico() {
+        return medico;
     }
-    public void liberarHorario(){}
 
-    /*public boolean verificarCruce(LocalTime horaBusqueda){}*/
+    public void setMedico(Medico medico) {
+        this.medico = medico;
+    }
 }

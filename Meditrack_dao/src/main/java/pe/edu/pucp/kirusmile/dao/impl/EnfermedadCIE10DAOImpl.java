@@ -1,75 +1,128 @@
 package pe.edu.pucp.kirusmile.dao.impl;
 
-import pe.edu.pucp.kirusmile.dao.EnfermedadCIE10DAO;
+import pe.edu.pucp.kirusmile.dao.inter.EnfermedadCIE10DAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
 import pe.edu.pucp.kirusmile.models.EnfermedadCIE10;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
 
+    private Connection con;
+
+    public EnfermedadCIE10DAOImpl() {
+        this.con = DBManager.getInstance().getConnection();
+    }
+
     @Override
-    public EnfermedadCIE10 load(Integer id) {
-        String sql = "SELECT codigoCIE, descripcionOficial FROM EnfermedadCIE10 WHERE codigoCIE = id";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, String.valueOf(id));
-            try (ResultSet rs = ps.executeQuery()) {
+    public int save(EnfermedadCIE10 objeto) {
+        int idGenerado = 0;
+        String sql = "INSERT INTO EnfermedadCIE10 (codigo_cie, descripcion_oficial) VALUES (?, ?)";
+
+        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pst.setString(1, objeto.getCodigoCIE());
+            pst.setString(2, objeto.getDescripcionOficial());
+
+            pst.executeUpdate();
+
+            try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
-                    EnfermedadCIE10 enf = new EnfermedadCIE10(
-                            rs.getString(1), rs.getString(2)
-                    );
-                    return enf;
+                    idGenerado = rs.getInt(1);
+                    objeto.setIdEnfermedadCIE10(idGenerado);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al guardar EnfermedadCIE10: " + e.getMessage());
         }
-        return null;
+        return idGenerado;
     }
 
     @Override
-    public EnfermedadCIE10 save(EnfermedadCIE10 t) {
-        String sql = "INSERT INTO EnfermedadCIE10 (codigoCIE, descripcionOficial) VALUES (?, ?)";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, t.getCodigocCIE()); ps.setString(2, t.getDescripcionOficial());
-            ps.executeUpdate();
-            return t;
+    public int update(EnfermedadCIE10 objeto) {
+        int filasAfectadas = 0;
+        String sql = "UPDATE EnfermedadCIE10 SET codigo_cie = ?, descripcion_oficial = ? WHERE id_enfermedad_cie10 = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, objeto.getCodigoCIE());
+            pst.setString(2, objeto.getDescripcionOficial());
+            pst.setInt(3, objeto.getIdEnfermedadCIE10());
+
+            filasAfectadas = pst.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al actualizar EnfermedadCIE10: " + e.getMessage());
         }
-        return null;
+        return filasAfectadas;
+    }
+
+    // Bloqueo estricto: Las normativas de la OMS son inmutables
+    @Override
+    public int delete(int id) {
+        throw new UnsupportedOperationException("Ilegal: No se permite eliminar códigos de diagnóstico internacional.");
     }
 
     @Override
-    public EnfermedadCIE10 update(EnfermedadCIE10 t) {
-        String sql = "UPDATE EnfermedadCIE10 SET codigoCIE = ?, descripcionOficial=? WHERE codigoCIE=?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, t.getCodigocCIE()); ps.setString(2, t.getDescripcionOficial());
-            ps.setString(3, t.getCodigocCIE());
+    public EnfermedadCIE10 load(int id) {
+        EnfermedadCIE10 enfermedad = null;
+        String sql = "SELECT * FROM EnfermedadCIE10 WHERE id_enfermedad_cie10 = ?";
 
-            ps.executeUpdate();
-            return t;
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    enfermedad = new EnfermedadCIE10();
+                    enfermedad.setIdEnfermedadCIE10(rs.getInt("id_enfermedad_cie10"));
+                    enfermedad.setCodigoCIE(rs.getString("codigo_cie"));
+                    enfermedad.setDescripcionOficial(rs.getString("descripcion_oficial"));
+                }
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al cargar EnfermedadCIE10: " + e.getMessage());
         }
-        return null;
+        return enfermedad;
     }
 
     @Override
-    public void remove(EnfermedadCIE10 t) {
-        String sql = "DELETE FROM Empleado  WHERE codigoCIE = ?";
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, t.getCodigocCIE());
-            ps.executeUpdate();
+    public List<EnfermedadCIE10> listALL() {
+        List<EnfermedadCIE10> lista = new ArrayList<>();
+        // Ordenamos alfabéticamente por el código (ej. K01, K02) para que se vea bien en el Front-end
+        String sql = "SELECT * FROM EnfermedadCIE10 ORDER BY codigo_cie ASC";
+
+        try (PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                EnfermedadCIE10 enfermedad = new EnfermedadCIE10();
+                enfermedad.setIdEnfermedadCIE10(rs.getInt("id_enfermedad_cie10"));
+                enfermedad.setCodigoCIE(rs.getString("codigo_cie"));
+                enfermedad.setDescripcionOficial(rs.getString("descripcion_oficial"));
+                lista.add(enfermedad);
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error al listar EnfermedadCIE10: " + e.getMessage());
         }
+        return lista;
+    }
+
+    @Override
+    public EnfermedadCIE10 obtenerPorCodigoCIE(String codigoCIE) {
+        EnfermedadCIE10 enfermedad = null;
+        String sql = "SELECT * FROM EnfermedadCIE10 WHERE codigo_cie = ?";
+
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, codigoCIE);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    enfermedad = new EnfermedadCIE10();
+                    enfermedad.setIdEnfermedadCIE10(rs.getInt("id_enfermedad_cie10"));
+                    enfermedad.setCodigoCIE(rs.getString("codigo_cie"));
+                    enfermedad.setDescripcionOficial(rs.getString("descripcion_oficial"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en obtenerPorCodigoCIE: " + e.getMessage());
+        }
+        return enfermedad;
     }
 }

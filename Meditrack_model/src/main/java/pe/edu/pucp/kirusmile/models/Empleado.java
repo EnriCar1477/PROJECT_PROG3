@@ -1,64 +1,116 @@
 package pe.edu.pucp.kirusmile.models;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Empleado extends Persona {
 
-    // --- ATRIBUTOS ---
+    // --- ATRIBUTOS LABORALES ---
+    private int idEmpleado;
     private String codigoEmpleado;
-    private Date fechaVinculacion;
-    private boolean estadoLaboral; // true = Activo, false = Inactivo/Cesado
+    private LocalDate fechaVinculacion;
+    private boolean estadoLaboral;
 
-    // --- GETTERS Y SETTERS INTERCALADOS ---
+    // --- DATOS DE: CUENTAUSUARIO---
+    private String username;
+    private String passwordHash;
+    private RolUsuario rol;
+    private LocalDateTime ultimoAcceso;
+    private List<LogAuditoria> auditorias;
+
+    // --- CONSTRUCTORES ---
+    public Empleado() {
+        super(); // Llama al constructor de Persona
+        this.auditorias = new ArrayList<>();
+        this.estadoLaboral = true; // Al registrar un nuevo empleado, entra trabajando
+    }
+
+    public Empleado(String codigoEmpleado, LocalDate fechaVinculacion, boolean estadoLaboral,
+                    String username, String passwordHash, RolUsuario rol) {
+        super();
+        this.codigoEmpleado = codigoEmpleado;
+        this.fechaVinculacion = fechaVinculacion;
+        this.estadoLaboral = estadoLaboral;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.rol = rol;
+        this.auditorias = new ArrayList<>();
+    }
+
+    // --- GETTERS Y SETTERS ---
+
+
+    public int getIdEmpleado() {
+        return idEmpleado;
+    }
+
+    public void setIdEmpleado(int idEmpleado) {
+        this.idEmpleado = idEmpleado;
+    }
 
     public String getCodigoEmpleado() {
         return codigoEmpleado;
     }
+
     public void setCodigoEmpleado(String codigoEmpleado) {
         this.codigoEmpleado = codigoEmpleado;
     }
 
-    public Date getFechaVinculacion() {
+    public LocalDate getFechaVinculacion() {
         return fechaVinculacion;
     }
-    public void setFechaVinculacion(Date fechaVinculacion) {
-        this.fechaVinculacion = fechaVinculacion;
+
+    public void setFechaVinculacion(LocalDate fechaViculacion) {
+        this.fechaVinculacion = fechaViculacion;
     }
 
     public boolean isEstadoLaboral() {
         return estadoLaboral;
     }
+
     public void setEstadoLaboral(boolean estadoLaboral) {
         this.estadoLaboral = estadoLaboral;
     }
 
-    // --- CONSTRUCTORES ---
-
-    public Empleado() {
-        super(); // Llama al constructor vacío de Persona
-        this.estadoLaboral = true; // Por defecto, al crearlo está activo
+    public String getUsername() {
+        return username;
     }
 
-    public Empleado(String dni, String nombres, String apellidoPaterno, String apellidoMaterno, Date fechaNacimiento, String telefono, String correo,
-                    String codigoEmpleado, Date fechaVinculacion) {
-        super(dni, nombres, apellidoPaterno, apellidoMaterno,fechaNacimiento,telefono,correo); // Datos de Persona
-        this.codigoEmpleado = codigoEmpleado;
-        this.fechaVinculacion = fechaVinculacion;
-        this.estadoLaboral = true;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    // --- MÉTODOS ---
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-    /**
-     * Método para cambiar el estado del empleado (ej. despido, renuncia o recontratación).
-     */
-    public void actualizarEstadoLaboral() {
-        if (!estadoLaboral) {
-            this.estadoLaboral = true;
-            System.out.println("El empleado " + this.codigoEmpleado + " ahora está ACTIVO.");
-        } else {
-            this.estadoLaboral = false;
-            System.out.println("El empleado " + this.codigoEmpleado + " ha sido DADO DE BAJA.");
-        }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public RolUsuario getRol() {
+        return rol;
+    }
+
+    public void setRol(RolUsuario rol) {
+        this.rol = rol;
+    }
+
+    public LocalDateTime getUltimoAcceso() {
+        return ultimoAcceso;
+    }
+
+    public void setUltimoAcceso(LocalDateTime ultimoAcceso) {
+        this.ultimoAcceso = ultimoAcceso;
+    }
+
+    public List<LogAuditoria> getAuditorias() {
+        return auditorias;
+    }
+
+    public void setAuditorias(List<LogAuditoria> auditorias) {
+        this.auditorias = auditorias;
     }
 }

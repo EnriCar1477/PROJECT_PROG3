@@ -1,83 +1,111 @@
-import pe.edu.pucp.kirusmile.dao.*;
+import pe.edu.pucp.kirusmile.BL.impl.*;
+import pe.edu.pucp.kirusmile.BL.inter.*;
 import pe.edu.pucp.kirusmile.dao.impl.*;
+
 import pe.edu.pucp.kirusmile.models.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 
 public class Program {
     public static void main(String[] args) {
-        System.out.println("--- INICIANDO PRUEBAS CRUD ---");
+        System.out.println("=== INICIANDO SISTEMA KIRUSMILE ===");
 
-        // Inicializar DAOs
-        EspecialidadDAO especialidadDAO = new EspecialidadDAOImpl();
-        PacienteDAO pacienteDAO = new PacienteDAOImpl();
-        MedicoDAO medicoDAO = new MedicoDAOImpl();
-        EnfermedadCIE10DAO enfermedadDAO = new EnfermedadCIE10DAOImpl();
-        
-        // ---------------------------------------------------------
-        // 1. CREACIÓN DE DATOS (SAVE)
-        // ---------------------------------------------------------
-        System.out.println("\n1. Insertando Especialidad...");
-        Especialidad esp = new Especialidad(2, "Odontologo", 70.0,true);
-        especialidadDAO.save(esp);
-        System.out.println("  -> Especialidad guardado con ID autogenerado: " + esp.getIdEspecialidad());
-
-        System.out.println("\n2. Insertando Paciente...");
-        Paciente p1 = new Paciente("87654321", "Dr. Luis", "Sanchez", "Vera", new java.util.Date(),
-                               "999111222", "luis@med.com", "O", "+", "Tecnico", "Estudiante",
-                               "peruano");
-        pacienteDAO.save(p1);
-        System.out.println("  -> Paciente guardado con ID autogenerado: " + p1.getDni());
-
-
-        System.out.println("\n2. Insertando Medico...");
-        Medico m1 = new Medico("87654321", "Dr. Luis", "Sanchez", "Vera", new java.util.Date(),
-                "999111222", "luis@med.com", "EMP001", new java.util.Date(), "3", "56", null, null,
-                "peruano", null, false);
-        medicoDAO.save(m1);
-        System.out.println("  -> Medico guardado con ID autogenerado: " + m1.getDni());
-
-        System.out.println("\n3. Insertando Enfermedad (Prueba Local)...");
-        EnfermedadCIE10 enfermedad = new EnfermedadCIE10("K02.9", "Caries dental, no especificada");
-        enfermedadDAO.save(enfermedad);
-        System.out.println("  -> Enfermedad creada en memoria: " + enfermedad.getCodigocCIE() + " - " + enfermedad.getDescripcionOficial());
-
+        // Instanciamos los controladores de la Lógica de Negocio
+        IEmpleadoBL empleadoBL = new EmpleadoBLImpl();
+        IPacienteBL pacienteBL = new PacienteBLImpl();
+        ICitaMedicaBL citaBL = new CitaMedicaBLImpl();
+        IHistorialMedicoBL historialBL = new HistorialMedicoBLImpl();
+        ILogAuditoriaBL auditoriaBL = new LogAuditoriaBLImpl();
 
         // ---------------------------------------------------------
-        // 2. LECTURA DE DATOS (LOAD)
+        // EJEMPLO 1: EL ESCUDO DE SEGURIDAD (Login)
         // ---------------------------------------------------------
-        System.out.println("\n--- PRUEBA DE LECTURA (LOAD) usando el nuevo Integer ID ---");
-        // Nota: Si la bd está vacía, p1.getId() tendría el primer ID (ej: 1)
-        Integer idEspecialidadABuscar = esp.getIdEspecialidad() != -1 ? esp.getIdEspecialidad() : 1;
-        Especialidad pLoaded = especialidadDAO.load(idEspecialidadABuscar);
-        if(pLoaded != null) System.out.println("Especialidad leida BD -> ID: " + pLoaded.getIdEspecialidad() + " | Nombre: " + pLoaded.getNombreEspecialidad());
-/*
-        Integer idMedicoABuscar = m1.getId() != null ? m1.getId() : 1;
-        Medico mLoaded = medicoDAO.load(idMedicoABuscar);
-        if(mLoaded != null) System.out.println("Medico leido BD -> ID: " + mLoaded.getId() + " | CMP: " + mLoaded.getCmp());
- */
+        System.out.println("\n1. Probando Autenticación de Usuario...");
+        Empleado usuarioLogueado = empleadoBL.autenticar("admin123", "secreto123");
 
-        // ---------------------------------------------------------
-        // 3. ACTUALIZACION DE DATOS (UPDATE)
-        // ---------------------------------------------------------
-        System.out.println("\n--- PRUEBA DE ACTUALIZACION (UPDATE) ---");
-        if (pLoaded != null) {
-            System.out.println("Nombre anterior: " + pLoaded.getNombreEspecialidad());
-            pLoaded.setNombreEspecialidad("Pediatra");
-            especialidadDAO.update(pLoaded);
-            System.out.println("  -> Nombre de especialidad actualizado en BD a: " + pLoaded.getNombreEspecialidad());
-        }
-        
-        // ---------------------------------------------------------
-        // 4. ELIMINACION DE DATOS (SOFT DELETE)
-        // ---------------------------------------------------------
-        System.out.println("\n--- PRUEBA DE ELIMINACION (Soft Delete) ---");
-        if (pLoaded != null) {
-            especialidadDAO.remove(pLoaded);
-            System.out.println("  -> Correcto: Especialidad desactivado lógicamente (desactivado = true)");
+        if (usuarioLogueado != null) {
+            System.out.println("¡Login exitoso! Bienvenido: " + usuarioLogueado.getNombres());
+            System.out.println("Rol detectado: " + usuarioLogueado.getRol());
+        } else {
+            System.out.println("Acceso denegado. Revisa credenciales.");
+            return; // Si falla, detenemos la prueba
         }
 
-        System.out.println("\n=== Pruebas CRUD terminadas exitosamente ===");
+        // ---------------------------------------------------------
+        // EJEMPLO 2: REGISTRO CON HERENCIA (Crear un Paciente)
+        // ---------------------------------------------------------
+        System.out.println("\n2. Probando Registro de Paciente...");
+        Paciente nuevoPaciente = new Paciente("O", "+", "Universitario", "Ingeniero");
+        // Datos heredados de Persona
+        nuevoPaciente.setDni("87654321");
+        nuevoPaciente.setNombres("Carlos");
+        nuevoPaciente.setApellidoPaterno("Pérez");
+        nuevoPaciente.setApellidoMaterno("Gómez");
+        nuevoPaciente.setFechaNacimiento(LocalDate.of(1995, 5, 20));
+        nuevoPaciente.setTelefono("987654321");
+        nuevoPaciente.setCorreo("carlos@email.com");
+
+        int idPacienteGenerado = pacienteBL.registrar(nuevoPaciente);
+        if (idPacienteGenerado > 0) {
+            System.out.println("Paciente registrado con éxito. ID Interno: " + idPacienteGenerado);
+            // Le actualizamos el ID al objeto para usarlo en el siguiente ejemplo
+            nuevoPaciente.setIdPaciente(idPacienteGenerado);
+        }
+
+        // ---------------------------------------------------------
+        // EJEMPLO 3: LA MÁQUINA DE ESTADOS Y TRANSACCIONES (Cita Médica)
+        // ---------------------------------------------------------
+        System.out.println("\n3. Probando Agendamiento de Cita...");
+        // Asumimos que ya existe un médico con ID 2 en la BD para esta prueba
+        Medico medicoPrueba = new Medico();
+        medicoPrueba.setIdMedico(2);
+
+        CitaMedica nuevaCita = new CitaMedica();
+        nuevaCita.setPaciente(nuevoPaciente);
+        nuevaCita.setMedicoAsignado(medicoPrueba);
+        nuevaCita.setEmpleado(usuarioLogueado); // Quien la registró
+        nuevaCita.setFecha(LocalDate.now().plusDays(2)); // Cita para pasado mañana
+        nuevaCita.setHoraInicio(LocalTime.of(10, 0));    // De 10:00 AM
+        nuevaCita.setHoraFin(LocalTime.of(11, 0));       // a 11:00 AM
+        nuevaCita.setMotivoAgendamiento("Dolor de muela del juicio");
+
+        int idCitaGenerada = citaBL.registrar(nuevaCita);
+        if (idCitaGenerada > 0) {
+            System.out.println("Cita agendada con éxito. ID: " + idCitaGenerada);
+            System.out.println("Estado inicial asignado por el BL: " + nuevaCita.getEstado());
+        }
+
+        // ---------------------------------------------------------
+        // EJEMPLO 4: EL DIRECTOR DE ORQUESTA (Ensamblaje del Historial)
+        // ---------------------------------------------------------
+        System.out.println("\n4. Probando Ensamblaje de Historial Clínico...");
+        // Asumiendo que el paciente que creamos generó el ID 1 o buscamos uno que ya exista
+        HistorialMedico historial = historialBL.obtenerPorIdPaciente(idPacienteGenerado);
+
+        if (historial != null) {
+            System.out.println("Historial recuperado exitosamente.");
+            System.out.println("Cantidad de consultas pasadas (Detalles): " + historial.getListaDetalles().size());
+        } else {
+            System.out.println("El paciente aún no tiene un historial clínico aperturado.");
+        }
+
+        // ---------------------------------------------------------
+        // EJEMPLO 5: LA CAJA NEGRA INMUTABLE (Auditoría)
+        // ---------------------------------------------------------
+        System.out.println("\n5. Probando Registro de Seguridad (Auditoría)...");
+        LogAuditoria log = new LogAuditoria();
+        log.setAccionRealizada("Registró al paciente " + nuevoPaciente.getDni() + " y agendó su primera cita.");
+        log.setIpTerminal("192.168.1.45"); // Simulamos la IP de la recepcionista
+        log.setEmpleado(usuarioLogueado);
+
+        int idLog = auditoriaBL.registrar(log);
+        if (idLog > 0) {
+            System.out.println("Acción auditada de forma segura e inmutable. ID Log: " + idLog);
+        }
+
+        System.out.println("\n=== PRUEBAS FINALIZADAS ===");
     }
+
+
 }

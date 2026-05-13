@@ -1,11 +1,11 @@
 package pe.edu.pucp.kirusmile.dao.base;
 
-public interface BaseDAO<T, ID> {
-    T load(ID id);
+import java.util.List;
 
-    T save(T t);
-
-    T update(T t);
-
-    void remove(T t);
+public interface BaseDAO<T> {
+    int save(T objeto);
+    int update(T objeto);
+    int delete(int id);
+    T load(int id);
+    List<T> listALL();
 }
