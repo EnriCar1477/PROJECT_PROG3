@@ -1,0 +1,195 @@
+﻿@page "/UsarioMedico"
+<h3>UsuarioMedico</h3>
+
+
+<!--DATOS DEL MEDICO-->
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold" style="border-bottom: 3px solid #22C7D6; padding-bottom: 10px;">
+                <i class="bi bi-person-badge-fill me-2"></i> PERFIL PROFESIONAL DEL MÉDICO
+            </h2>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-light fw-bold">
+            Identidad Profesional
+        </div>
+        <div class="card-body d-flex align-items-center">
+            <div class="me-4">
+                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            <div>
+                <h4 class="mb-1">Juan Gómez Pérez </h4>
+                <span class="badge text-dark" style="background-color: #22C7D6; font-size: 1rem;">
+                    Dentista - Odontología General
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4 g-3">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-light fw-bold">
+                    <i class="bi bi-card-heading me-1"></i> Credenciales Legales
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">CMP (Colegio Médico del Perú)</label>
+                        <input type="text" class="form-control bg-light" value="12345" readonly />
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small">RNE (Registro Nacional de Especialista)</label>
+                        <input type="text" class="form-control bg-light" value="06789" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0" style="background-color: #f8f9fa;">
+                <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-pen me-1"></i> Firma Digital Legal</span>
+                    <i class="bi bi-lock-fill text-success"></i>
+                </div>
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <span class="badge bg-success mb-3 mx-auto">Configurada e Inmutable</span>
+                    <div class="p-3 border border-dashed bg-white rounded">
+                        <em class="text-muted" style="font-family: 'Brush Script MT', cursive; font-size: 1.5rem;">Firma del Doctor</em>
+                    </div>
+                    <small class="text-muted mt-2">Requerida para cerrar DetalleHistorial</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-light fw-bold">
+                    <i class="bi bi-shield-lock me-1"></i> Información de Contacto
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Correo:</strong> <span class="text-muted">jgomez@meditrack.com</span>
+                    </div>
+                    <div class="mb-4">
+                        <strong>Teléfono:</strong> <span class="text-muted">+51 987 654 321</span>
+                    </div>
+
+                    <div class="alert alert-secondary py-2 mb-0" role="alert">
+                        <i class="bi bi-clock-history me-1"></i> <small><strong>Último Acceso:</strong> <br />13/05/2026 19:27:40</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!--HORARIO-->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header text-white fw-bold d-flex align-items-center" style="background-color: #22C7D6;">
+            <i class="bi bi-calendar3 me-2"></i> Mi Agenda Semanal
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle mb-0" style="table-layout: fixed; min-width: 800px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 120px;"><i class="bi bi-clock"></i> Hora</th>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miércoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                            <th>Sábado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-muted bg-light">08:00 - 12:00</td>
+
+                            <td style="background-color: rgba(34, 199, 214, 0.15); border-left: 4px solid #22C7D6;">
+                                <span class="fw-bold text-dark d-block">Turno Mañana</span>
+                                <small class="text-muted">Consultorio 101</small>
+                            </td>
+
+                            <td class="text-muted" style="background-color: #f8f9fa;">Libre</td>
+
+                            <td style="background-color: rgba(34, 199, 214, 0.15); border-left: 4px solid #22C7D6;">
+                                <span class="fw-bold text-dark d-block">Turno Mañana</span>
+                                <small class="text-muted">Consultorio 101</small>
+                            </td>
+
+                            <td class="text-muted" style="background-color: #f8f9fa;">Libre</td>
+
+                            <td style="background-color: rgba(34, 199, 214, 0.15); border-left: 4px solid #22C7D6;">
+                                <span class="fw-bold text-dark d-block">Turno Mañana</span>
+                                <small class="text-muted">Consultorio 101</small>
+                            </td>
+
+                            <td class="text-muted" style="background-color: #f8f9fa;">Libre</td>
+                        </tr>
+
+                        <tr class="table-secondary text-muted">
+                            <td class="fw-bold">12:00 - 14:00</td>
+                            <td colspan="6" class="text-center"><i class="bi bi-cup-hot me-1"></i> Horario de Refrigerio</td>
+                        </tr>
+
+                        <tr>
+                            <td class="fw-bold text-muted bg-light">14:00 - 18:00</td>
+
+                            <td style="background-color: rgba(34, 199, 214, 0.15); border-left: 4px solid #22C7D6;">
+                                <span class="fw-bold text-dark d-block">Turno Tarde</span>
+                                <small class="text-muted">Consultorio 101</small>
+                            </td>
+
+                            <td class="text-muted" style="background-color: #f8f9fa;">Libre</td>
+
+                            <td style="background-color: rgba(34, 199, 214, 0.15); border-left: 4px solid #22C7D6;">
+                                <span class="fw-bold text-dark d-block">Turno Tarde</span>
+                                <small class="text-muted">Consultorio 101</small>
+                            </td>
+
+                            <td class="text-muted" style="background-color: #f8f9fa;">Libre</td>
+
+                            <td style="background-color: rgba(34, 199, 214, 0.15); border-left: 4px solid #22C7D6;">
+                                <span class="fw-bold text-dark d-block">Turno Tarde</span>
+                                <small class="text-muted">Consultorio 101</small>
+                            </td>
+
+                            <td class="text-muted" style="background-color: #f8f9fa;">Libre</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@code {
+
+}

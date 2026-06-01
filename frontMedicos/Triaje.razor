@@ -1,0 +1,181 @@
+﻿@page "/Triaje"
+<h3>Triaje</h3>
+<!--INFORMACION BRINDADÁ POR EL SECRETARIO, POR ESO YA ESTA LLENA-->
+
+
+<!-- ESTILOS PARA EL STEPPER CENTRADO CON CONECTORES FIJOS -->
+<style>
+    .stepper-container {
+        display: flex;
+        justify-content: center; /* Centra el grupo de botones y conectores */
+        align-items: center;
+        flex-wrap: nowrap;
+        margin-bottom: 2rem;
+        overflow-x: auto; /* Por si la pantalla es muy pequeña, permite scroll horizontal */
+    }
+
+    /* Estilo base de los botones del stepper */
+    .step-btn {
+        flex: 0 0 auto;
+        min-width: 140px;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        border: 2px solid #dee2e6;
+        padding: 0.5rem 1rem;
+        text-align: center;
+        pointer-events: none; /* No clickeables (solo visuales) */
+        background-color: #e2e3e5;
+        color: #6c757d;
+        transition: all 0.2s ease;
+    }
+
+        /* Estilo para el paso actual (Triaje) */
+        .step-btn.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd;
+        }
+
+    /* Conector entre pasos (ancho fijo para que el grupo se centre correctamente) */
+    .step-connector {
+        width: 60px; /* Ancho fijo para mantener la línea centrada */
+        height: 4px;
+        background-color: #dee2e6;
+        margin: 0 0.5rem;
+        flex-shrink: 0; /* Evita que se encoja */
+    }
+
+    /* Opcional: si en algún futuro quieres que algunos botones sean clickeables */
+    .step-btn.clickable {
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+    /* Ajuste para pantallas pequeñas: botones más compactos y conectores más cortos */
+    @@media (max-width: 992px) {
+        .step-btn {
+            min-width: 110px;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.75rem;
+        }
+
+        .step-connector {
+            width: 40px;
+            margin: 0 0.25rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .step-btn {
+            min-width: 90px;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .step-connector {
+            width: 25px;
+            margin: 0 0.15rem;
+        }
+
+        .stepper-container {
+            justify-content: flex-start; /* En móvil muy pequeño, alinea a la izquierda para scroll */
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- PANEL SUPERIOR: DATOS DEL PACIENTE -->
+    <div class="d-flex justify-content-between align-items-center text-white p-3 rounded-3 mb-4 shadow-sm" style="background-color: #0d6efd;">
+        <div class="d-flex align-items-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px; background-color: rgba(255,255,255,0.3);">
+                <i class="bi bi-person text-white fs-4"></i>
+            </div>
+            <h5 class="mb-0 fw-medium">Ana Ramirez (DNI: 98765432)</h5>
+        </div>
+        <div>
+            <i class="bi bi-card-list fs-2" style="cursor: pointer;"></i>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN DE PASOS (STEPPER CENTRADO CON CONECTORES) -->
+    <div class="stepper-container">
+        <button class="btn step-btn active">Triaje</button>
+        <div class="step-connector"></div>
+
+        <button class="btn step-btn">Anamnesis</button>
+        <div class="step-connector"></div>
+
+        <button class="btn step-btn">Diagnóstico</button>
+        <div class="step-connector"></div>
+
+        <button class="btn step-btn">Tratamiento</button>
+        <div class="step-connector"></div>
+
+        <button class="btn step-btn">Cierre y Firma</button>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DEL FORMULARIO DE TRIAJE -->
+    <div class="card border border-2 rounded-3 shadow-sm">
+        <div class="card-body p-5">
+
+            <form>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Peso (Kg)</label>
+                        <input type="text" class="form-control border-dark" value="60">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Talla</label>
+                        <input type="text" class="form-control border-dark" value="1.60">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Presión arterial</label>
+                        <input type="text" class="form-control border-dark" value="120/80">
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Temperatura</label>
+                        <input type="text" class="form-control border-dark" value="32°">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Saturación</label>
+                        <input type="text" class="form-control border-dark" value="98">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">ICM</label>
+                        <input type="text" class="form-control border-dark" value="23.2">
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Fecha creación</label>
+                        <input type="text" class="form-control border-dark" value="29/11/2006" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Hora creación</label>
+                        <input type="text" class="form-control border-dark" value="2:30:34" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">Hecho por secretario/a:</label>
+                        <input type="text" class="form-control border-dark" value="Johana Diaz" readonly>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-4 mt-2">
+                    <a href="DetalleHistorial" class="btn btn-outline-dark fw-bold rounded-2" style="width: 250px; padding-top: 10px; padding-bottom: 10px;">
+                        CANCELAR
+                    </a>
+                    <a href="anamnesis" class="btn btn-primary fw-bold text-white rounded-2 d-flex align-items-center justify-content-center" style="width: 250px; padding-top: 10px; padding-bottom: 10px; background-color: #0d6efd; text-decoration: none;">
+                        CONTINUAR
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
