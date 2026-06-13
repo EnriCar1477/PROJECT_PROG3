@@ -12,6 +12,7 @@ public class Empleado extends Persona {
     private String codigoEmpleado;
     private LocalDate fechaVinculacion;
     private boolean estadoLaboral;
+    private boolean activo; // NUEVO: Para el borrado lógico (TINYINT(1) en MySQL)
 
     // --- DATOS DE: CUENTAUSUARIO---
     private String username;
@@ -62,8 +63,8 @@ public class Empleado extends Persona {
         return fechaVinculacion;
     }
 
-    public void setFechaVinculacion(LocalDate fechaViculacion) {
-        this.fechaVinculacion = fechaViculacion;
+    public void setFechaVinculacion(LocalDate fechaVinculacion) {
+        this.fechaVinculacion = fechaVinculacion;
     }
 
     public boolean isEstadoLaboral() {
@@ -72,6 +73,14 @@ public class Empleado extends Persona {
 
     public void setEstadoLaboral(boolean estadoLaboral) {
         this.estadoLaboral = estadoLaboral;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
     public String getUsername() {

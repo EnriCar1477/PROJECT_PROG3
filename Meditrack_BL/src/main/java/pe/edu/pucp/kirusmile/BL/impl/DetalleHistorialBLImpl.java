@@ -27,8 +27,9 @@ public class DetalleHistorialBLImpl implements IDetalleHistorialBL {
     @Override
     public int registrar(DetalleHistorial detalle) {
         // Regla de Negocio: La consulta debe originarse de una cita y pertenecer a un historial
-        if (detalle.getHistorialMedico() == null || detalle.getCitaOrigen() == null) {
-            System.err.println("Error BL: El detalle debe estar vinculado a un Historial y a una Cita.");
+        if (detalle.getHistorialMedico() == null || detalle.getHistorialMedico().getIdHistorial() <= 0 ||
+                detalle.getCitaOrigen() == null || detalle.getCitaOrigen().getIdCitaMedica() <= 0) {
+            System.err.println("Error BL: El detalle debe estar vinculado a un Historial y a una Cita válida.");
             return 0;
         }
 

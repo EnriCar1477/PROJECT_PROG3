@@ -9,12 +9,13 @@ public class Anamnesis {
     private String formaInicio;
     private String relatoClinico;
     private String antecedentesImportantes;
-
+    private boolean activo;
 
     private DetalleHistorial detalleHistorial;
 
     // --- CONSTRUCTORES ---
     public Anamnesis() {
+        this.activo = true;
     }
 
     public Anamnesis(String motivoPrincipal, String tiempoEnfermedad, String formaInicio,
@@ -83,5 +84,13 @@ public class Anamnesis {
 
     public void setDetalleHistorial(DetalleHistorial detalleHistorial) {
         this.detalleHistorial = detalleHistorial;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

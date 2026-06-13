@@ -17,9 +17,20 @@ public class DBManager {
     private final String DB_CREDENTIALS_FILE = "db.properties";
 
     private DBManager() {
+
+        // CORRECCIÓN 1: Registrar el Driver explícitamente
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Error: No se encontró el Driver MySQL en el classpath.", e);
+        }
+
         properties = new Properties();
         try{
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(DB_CREDENTIALS_FILE);
+            if (inputStream == null) {
+                throw new IOException("No se pudo encontrar el archivo: " + DB_CREDENTIALS_FILE);
+            }
             properties.load(inputStream);
         }catch(IOException ex){
             System.out.println("Error when loading properties file: " + ex.getMessage());
@@ -27,7 +38,8 @@ public class DBManager {
         String host = properties.getProperty("host");
         String port = properties.getProperty("port");
         String database = properties.getProperty("database");
-        this.url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+        //CAMBIO EN URL
+        this.url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?serverTimezone=UTC&useSSL=false";
         this.user = properties.getProperty("user");
         this.password = properties.getProperty("password");
     }

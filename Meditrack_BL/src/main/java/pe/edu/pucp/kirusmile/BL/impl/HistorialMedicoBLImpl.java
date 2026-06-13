@@ -7,35 +7,49 @@ import pe.edu.pucp.kirusmile.dao.inter.DetalleHistorialDAO;
 import pe.edu.pucp.kirusmile.dao.inter.HistorialMedicoDAO;
 import pe.edu.pucp.kirusmile.models.HistorialMedico;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 public class HistorialMedicoBLImpl implements IHistorialMedicoBL {
 
-    // El BL se comunica con los DAOs, NUNCA con la base de datos directamente
     private HistorialMedicoDAO historialDAO;
-    private DetalleHistorialDAO detalleDAO;
 
     public HistorialMedicoBLImpl() {
         this.historialDAO = new HistorialMedicoDAOImpl();
-        this.detalleDAO = new DetalleHistorialDAOImpl();
+        // CORRECCIÓN 1: Eliminamos el DetalleHistorialDAO.
+        // Ya no lo necesitamos aquí porque el HistorialMedicoDAOImpl ahora
+        // se encarga de llenar la lista de detalles automáticamente en su método load().
     }
-
 
     @Override
     public int registrar(HistorialMedico historial) {
-        // Regla de Negocio: Validar que el paciente no sea nulo antes de ir al DAO
-        if (historial.getPaciente() == null || historial.getPaciente().getIdPaciente() == 0) {
+        // Regla de Negocio 1: Validar paciente
+        if (historial.getPaciente() == null || historial.getPaciente().getIdPaciente() <= 0) {
             System.err.println("Error BL: El historial debe pertenecer a un paciente válido.");
             return 0;
         }
 
-        // Opcional: Podrías verificar si el paciente ya tiene un historial activo
-        // para no duplicarlo, llamando a obtenerPorIdPaciente(historial.getPaciente().getIdPaciente())
+        // CORRECCIÓN 2: Regla de Negocio CRÍTICA (Evitar duplicidad)
+        // La BD tiene un UNIQUE KEY en fid_paciente. Debemos evitar que se caiga el sistema.
+        HistorialMedico existente = historialDAO.obtenerPorIdPaciente(historial.getPaciente().getIdPaciente());
+        if (existente != null) {
+            System.err.println("Error BL: El paciente ya tiene un historial médico registrado (Historial #" + existente.getIdHistorial() + ").");
+            return 0; // Bloqueamos la creación
+        }
+
+        // Regla de Negocio 3: Autocompletado seguro
+        if (historial.getFechaCreacion() == null) {
+            historial.setFechaCreacion(LocalDateTime.now()); // La fecha de hoy si viene vacía
+        }
+        historial.setActivo(true);
 
         return historialDAO.save(historial);
     }
 
     @Override
     public int actualizar(HistorialMedico historial) {
-        if (historial.getIdHistorial() == 0) {
+        if (historial.getIdHistorial() <= 0) {
             System.err.println("Error BL: No se puede actualizar un historial sin ID.");
             return 0;
         }
@@ -44,27 +58,27 @@ public class HistorialMedicoBLImpl implements IHistorialMedicoBL {
 
     @Override
     public HistorialMedico obtenerPorIdPaciente(int idPaciente) {
-        // 1. Obtenemos el "cascarón" del historial desde la base de datos
-        HistorialMedico historial = historialDAO.obtenerPorIdPaciente(idPaciente);
+        if (idPaciente <= 0) return null;
 
-        // 2. ENSAMBLAJE: Si el historial existe, le cargamos todas sus citas/detalles
-        if (historial != null) {
-            // El BL usa el DetalleDAO para llenar la lista del Historial
-            historial.setListaDetalles(detalleDAO.listarPorHistorial(historial.getIdHistorial()));
-        }
-
-        return historial;
+        // CORRECCIÓN 3: Delegamos el trabajo pesado al DAO.
+        // El HistorialMedicoDAOImpl que creamos ya hace el INNER JOIN del Paciente
+        // y ejecuta la subconsulta para llenar la ListaDetalles.
+        return historialDAO.obtenerPorIdPaciente(idPaciente);
     }
 
     @Override
-    public HistorialMedico obtenerPorId(int idHistorial) {
-        HistorialMedico historial = historialDAO.load(idHistorial);
+    public HistorialMedico obtenerPorIdHistorial(int idHistorial) {
+        if (idHistorial <= 0) return null;
 
-        if (historial != null) {
-            // Llenamos la lista de detalles históricos
-            historial.setListaDetalles(detalleDAO.listarPorHistorial(historial.getIdHistorial()));
+        // Exactamente lo mismo, el DAO devuelve el objeto listo para Blazor
+        return historialDAO.load(idHistorial);
+    }
+
+    @Override
+    public List<HistorialMedico> listarPorDniOApellido(String filtro) {
+        if (filtro == null || filtro.trim().isEmpty()) {
+            return new ArrayList<>(); // Si envían vacío, devolvemos lista vacía
         }
-
-        return historial;
+        return historialDAO.listarPorDniOApellido(filtro);
     }
 }

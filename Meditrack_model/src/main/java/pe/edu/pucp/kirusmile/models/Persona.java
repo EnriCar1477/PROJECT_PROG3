@@ -1,9 +1,6 @@
 package pe.edu.pucp.kirusmile.models;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.Calendar;
-
 public class Persona {
 
     // --- ATRIBUTOS PROPIOS ---

@@ -6,6 +6,7 @@ import pe.edu.pucp.kirusmile.dao.inter.TratamientoDAO;
 import pe.edu.pucp.kirusmile.models.Tratamiento;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TratamientoBLImpl implements ITratamientoBL {
@@ -16,12 +17,11 @@ public class TratamientoBLImpl implements ITratamientoBL {
         this.tratamientoDAO = new TratamientoDAOImpl();
     }
 
-
     @Override
     public int registrar(Tratamiento tratamiento) {
         // 1. Validaciones estructurales
-        if (tratamiento.getDetalleHistorial() == null || tratamiento.getDetalleHistorial().getIdDetalle() == 0) {
-            System.err.println("Error BL: El tratamiento debe estar asociado a una consulta (DetalleHistorial).");
+        if (tratamiento.getDetalleHistorial() == null || tratamiento.getDetalleHistorial().getIdDetalle() <= 0) {
+            System.err.println("Error BL: El tratamiento debe estar asociado a una consulta válida (DetalleHistorial).");
             return 0;
         }
 
@@ -35,12 +35,15 @@ public class TratamientoBLImpl implements ITratamientoBL {
             return 0;
         }
 
+        // 4. Aseguramos el estado activo
+        tratamiento.setActivo(true);
+
         return tratamientoDAO.save(tratamiento);
     }
 
     @Override
     public int actualizar(Tratamiento tratamiento) {
-        if (tratamiento.getIdTratamiento() == 0) {
+        if (tratamiento.getIdTratamiento() <= 0) {
             System.err.println("Error BL: No se puede actualizar un tratamiento sin su ID.");
             return 0;
         }
@@ -52,13 +55,26 @@ public class TratamientoBLImpl implements ITratamientoBL {
         return tratamientoDAO.update(tratamiento);
     }
 
+    // --- ¡NUEVO! Método indispensable para el FrontEnd ---
+    @Override
+    public int eliminar(int idTratamiento) {
+        if (idTratamiento <= 0) {
+            System.err.println("Error BL: ID de tratamiento inválido para eliminar.");
+            return 0;
+        }
+        // Aplica el borrado lógico que programamos en el DAO
+        return tratamientoDAO.delete(idTratamiento);
+    }
+
     @Override
     public Tratamiento obtenerPorId(int idTratamiento) {
+        if (idTratamiento <= 0) return null;
         return tratamientoDAO.load(idTratamiento);
     }
 
     @Override
     public List<Tratamiento> listarPorFidDetalle(int fidDetalle) {
+        if (fidDetalle <= 0) return new ArrayList<>();
         // Método invocado por el DetalleHistorialBL para armar el objeto completo de la cita
         return tratamientoDAO.listarPorFidDetalle(fidDetalle);
     }
@@ -93,7 +109,4 @@ public class TratamientoBLImpl implements ITratamientoBL {
 
         return true;
     }
-
-
-
 }

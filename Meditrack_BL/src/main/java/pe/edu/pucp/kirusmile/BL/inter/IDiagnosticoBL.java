@@ -16,4 +16,6 @@ public interface IDiagnosticoBL {
 
     // Método vital: Devuelve la lista de diagnósticos de una consulta específica
     List<Diagnostico> listarPorFidDetalle(int fidDetalle);
+
+    public int eliminar(int idDiagnostico);
 }

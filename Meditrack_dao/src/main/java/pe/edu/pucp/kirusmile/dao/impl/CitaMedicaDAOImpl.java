@@ -21,56 +21,39 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
 
     @Override
     public int save(CitaMedica objeto) {
+        if (objeto.getPaciente() == null || objeto.getMedicoAsignado() == null) {
+            System.err.println("Error: Paciente o Médico no pueden ser nulos.");
+            return 0;
+        }
+
         int idGenerado = 0;
-        // Mapeo exacto al script de SQL con todos los campos administrativos y de pago
         String sql = "INSERT INTO CitaMedica (fid_paciente, fid_medico, fid_empleado, fecha, " +
                 "hora_inicio, hora_fin, motivo_agendamiento, fid_estado_cita, monto, " +
                 "fecha_hora_pago, metodo_pago) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            // Llaves foráneas (f)
-            // una cita requiere un Paciente.
             pst.setInt(1, objeto.getPaciente().getIdPaciente());
-
             pst.setInt(2, objeto.getMedicoAsignado().getIdMedico());
-            System.out.println("ID Paciente enviado: " + objeto.getMedicoAsignado().getIdMedico());
 
-            // El empleado (recepcionista) puede ser opcional
             if (objeto.getEmpleado() != null) pst.setInt(3, objeto.getEmpleado().getIdEmpleado());
             else pst.setNull(3, java.sql.Types.INTEGER);
 
-            // Datos temporales
             pst.setDate(4, java.sql.Date.valueOf(objeto.getFecha()));
             pst.setTime(5, java.sql.Time.valueOf(objeto.getHoraInicio()));
             pst.setTime(6, java.sql.Time.valueOf(objeto.getHoraFin()));
-
             pst.setString(7, objeto.getMotivoAgendamiento());
-
-            // Enum de Estado (Mapeado a ID del catálogo)
             pst.setInt(8, objeto.getEstado().ordinal() + 1);
+            pst.setDouble(9, objeto.getMonto());
 
-            // Datos de Pago
-            // --- PROTECCIÓN CONTRA NULLPOINTEREXCEPTION ---
-            pst.setDouble(9,objeto.getMonto());
+            if (objeto.getFechaHoraPago() != null) pst.setTimestamp(10, Timestamp.valueOf(objeto.getFechaHoraPago()));
+            else pst.setNull(10, Types.TIMESTAMP);
 
-            if (objeto.getFechaHoraPago() != null) {
-                pst.setTimestamp(10, Timestamp.valueOf(objeto.getFechaHoraPago()));
-            } else {
-                pst.setNull(10, Types.TIMESTAMP);
-            }
-
-            if (objeto.getMetodoPago() != null) {
-                pst.setString(11, objeto.getMetodoPago());
-            } else {
-                pst.setNull(11, Types.VARCHAR);
-            }
+            pst.setString(11, objeto.getMetodoPago());
 
             pst.executeUpdate();
             try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) idGenerado = rs.getInt(1);
             }
-			
         } catch (SQLException e) {
             System.err.println("Error al guardar CitaMedica: " + e.getMessage());
         }
@@ -110,13 +93,26 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
 
     @Override
     public int delete(int id) {
-        return 0;
+        String sql = "UPDATE CitaMedica SET activo = 0 WHERE id_cita_medica = ?";
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            return pst.executeUpdate();
+        } catch (SQLException e) { return 0; }
     }
 
     @Override
     public CitaMedica load(int id) {
         CitaMedica cita = null;
-        String sql = "SELECT * FROM CitaMedica WHERE id_cita_medica = ?";
+        String sql = "SELECT c.*, p.nombres AS p_nombres, p.apellido_paterno AS p_ap, " +
+                "per_m.nombres AS m_nombres, per_m.apellido_paterno AS m_ap " +
+                "FROM CitaMedica c " +
+                "INNER JOIN Paciente pac ON c.fid_paciente = pac.id_paciente " +
+                "INNER JOIN Persona p ON pac.fid_persona = p.id_persona " +
+                "INNER JOIN Medico m ON c.fid_medico = m.id_medico " +
+                "INNER JOIN Empleado emp ON m.fid_empleado = emp.id_empleado " +
+                "INNER JOIN Persona per_m ON emp.fid_persona = per_m.id_persona " +
+                "WHERE c.id_cita_medica = ? AND c.activo = 1";
+
         try (PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
@@ -127,25 +123,33 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
                     cita.setHoraInicio(rs.getTime("hora_inicio").toLocalTime());
                     cita.setHoraFin(rs.getTime("hora_fin").toLocalTime());
                     cita.setMotivoAgendamiento(rs.getString("motivo_agendamiento"));
+                    cita.setActivo(rs.getBoolean("activo"));
 
-                    // Recuperar Enum (Convertir ID de BD a Enum de Java)
+                    // Seguridad Enum
                     int idEstado = rs.getInt("fid_estado_cita");
-                    cita.setEstado(EstadoCita.values()[idEstado - 1]);
+                    if (idEstado >= 1 && idEstado <= EstadoCita.values().length)
+                        cita.setEstado(EstadoCita.values()[idEstado - 1]);
 
                     cita.setMonto(rs.getDouble("monto"));
-                    if (rs.getTimestamp("fecha_hora_pago") != null) {
+                    if (rs.getTimestamp("fecha_hora_pago") != null)
                         cita.setFechaHoraPago(rs.getTimestamp("fecha_hora_pago").toLocalDateTime());
-                    }
-                    cita.setMetodoPago(rs.getString("metodo_pago"));
 
-                    // Ensamblaje básico de llaves foráneas (IDs)
-                    Paciente p = new Paciente(); p.setIdPaciente(rs.getInt("fid_paciente"));
+                    // Ensamblaje Paciente
+                    Paciente p = new Paciente();
+                    p.setIdPaciente(rs.getInt("fid_paciente"));
+                    p.setNombres(rs.getString("p_nombres"));
+                    p.setApellidoPaterno(rs.getString("p_ap"));
                     cita.setPaciente(p);
-                    Medico m = new Medico(); m.setIdMedico(rs.getInt("fid_medico"));
+
+                    // Ensamblaje Médico
+                    Medico m = new Medico();
+                    m.setIdMedico(rs.getInt("fid_medico"));
+                    m.setNombres(rs.getString("m_nombres"));
+                    m.setApellidoPaterno(rs.getString("m_ap"));
                     cita.setMedicoAsignado(m);
                 }
             }
-        } catch (SQLException e) { System.err.println("Error load Cita: " + e.getMessage()); }
+        } catch (SQLException e) { System.err.println("Error load: " + e.getMessage()); }
         return cita;
     }
 

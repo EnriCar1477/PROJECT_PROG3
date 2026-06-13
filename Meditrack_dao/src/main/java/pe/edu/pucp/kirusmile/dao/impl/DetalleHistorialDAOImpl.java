@@ -12,28 +12,29 @@ import java.util.List;
 
 public class DetalleHistorialDAOImpl implements DetalleHistorialDAO {
 
-    private Connection con;
-
     public DetalleHistorialDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío, la conexión se obtiene localmente en cada método
     }
 
     @Override
     public int save(DetalleHistorial objeto) {
         int idGenerado = 0;
-        // Según tu SQL: id_historial_medico, id_cita_medica, esta_cerrada, fecha_cierre, nota_aclaratoria
+        // Agregamos el campo 'activo'
         String sql = "INSERT INTO DetalleHistorial (fid_historial_medico, fid_cita_medica, esta_cerrada, " +
-                "fecha_cierre, nota_aclaratoria) VALUES (?, ?, ?, ?, ?)";
+                "fecha_cierre, nota_aclaratoria, activo) VALUES (?, ?, ?, ?, ?, 1)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             pst.setInt(1, objeto.getHistorialMedico().getIdHistorial());
             pst.setInt(2, objeto.getCitaOrigen().getIdCitaMedica());
             pst.setBoolean(3, objeto.isEstaCerrada());
-            // --- PROTECCIÓN CONTRA NULLPOINTEREXCEPTION ---
+
+            // Protección contra NullPointerException
             if (objeto.getFechaCierre() != null) {
                 pst.setTimestamp(4, Timestamp.valueOf(objeto.getFechaCierre()));
             } else {
-                pst.setNull(4, Types.TIMESTAMP); // Caso: Atención recién abierta
+                pst.setNull(4, Types.TIMESTAMP);
             }
 
             if (objeto.getNotaAclaratoria() != null) {
@@ -59,13 +60,21 @@ public class DetalleHistorialDAOImpl implements DetalleHistorialDAO {
     @Override
     public int update(DetalleHistorial objeto) {
         int filas = 0;
-        // El update es vital para cuando el médico "Cierra" la atención
         String sql = "UPDATE DetalleHistorial SET esta_cerrada = ?, fecha_cierre = ?, " +
                 "nota_aclaratoria = ? WHERE id_detalle = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setBoolean(1, objeto.isEstaCerrada());
-            pst.setObject(2, objeto.getFechaCierre());
+
+            // CORRECCIÓN: Manejo seguro del LocalDateTime al igual que en el Save
+            if (objeto.getFechaCierre() != null) {
+                pst.setTimestamp(2, Timestamp.valueOf(objeto.getFechaCierre()));
+            } else {
+                pst.setNull(2, Types.TIMESTAMP);
+            }
+
             pst.setString(3, objeto.getNotaAclaratoria());
             pst.setInt(4, objeto.getIdDetalle());
 
@@ -76,37 +85,51 @@ public class DetalleHistorialDAOImpl implements DetalleHistorialDAO {
         return filas;
     }
 
-    //BLOQUEADO POR LEY MEDICA
     @Override
     public int delete(int id) {
-        return 0;
+        int resultado = 0;
+        // CORRECCIÓN: Borrado Lógico por si el médico registró una atención por accidente
+        String sql = "UPDATE DetalleHistorial SET activo = 0 WHERE id_detalle = ?";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            resultado = ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al anular DetalleHistorial: " + e.getMessage());
+        }
+        return resultado;
     }
 
     @Override
     public DetalleHistorial load(int id) {
         DetalleHistorial detalle = null;
-        String sql = "SELECT * FROM DetalleHistorial WHERE id_detalle = ?";
+        // CORRECCIÓN: Añadido filtro activo = 1
+        String sql = "SELECT * FROM DetalleHistorial WHERE id_detalle = ? AND activo = 1";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     detalle = new DetalleHistorial();
                     detalle.setIdDetalle(rs.getInt("id_detalle"));
                     detalle.setEstaCerrada(rs.getBoolean("esta_cerrada"));
+
                     if (rs.getTimestamp("fecha_cierre") != null) {
                         detalle.setFechaCierre(rs.getTimestamp("fecha_cierre").toLocalDateTime());
                     }
-                    detalle.setNotaAclaratoria(rs.getString("nota_aclaratoria"));
 
-                    // Solo cargamos IDs de las relaciones, la carga completa de objetos (Triaje, Anamnesis, etc.)
-                    // se hace mediante sus propios DAOs en la capa de negocio (Service).
+                    detalle.setNotaAclaratoria(rs.getString("nota_aclaratoria"));
+                    detalle.setActivo(rs.getBoolean("activo")); // Seteamos el atributo nuevo
+
+                    // Ensamblaje de foráneas
                     HistorialMedico h = new HistorialMedico();
-                    h.setIdHistorial(rs.getInt("id_historial_medico"));
+                    h.setIdHistorial(rs.getInt("fid_historial_medico")); // Corrección de nombre de columna
                     detalle.setHistorialMedico(h);
 
                     CitaMedica c = new CitaMedica();
-                    c.setIdCitaMedica(rs.getInt("id_cita_medica"));
+                    c.setIdCitaMedica(rs.getInt("fid_cita_medica")); // Corrección de nombre de columna
                     detalle.setCitaOrigen(c);
                 }
             }
@@ -116,25 +139,29 @@ public class DetalleHistorialDAOImpl implements DetalleHistorialDAO {
         return detalle;
     }
 
-    //POR AHORA SOLO LISTAREMOS UNO POR UNO POR SU ID
     @Override
     public List<DetalleHistorial> listALL() {
-        return List.of();
+        return new ArrayList<>(); // Vacío por requerimiento
     }
-
 
     @Override
     public List<DetalleHistorial> listarPorHistorial(int idHistorialMedico) {
         List<DetalleHistorial> lista = new ArrayList<>();
-        String sql = "SELECT id_detalle FROM DetalleHistorial WHERE id_historial_medico = ? ORDER BY id_detalle DESC";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setInt(1, idHistorialMedico);
+        // CORRECCIÓN: Filtramos solo los activos
+        String sql = "SELECT id_detalle FROM DetalleHistorial WHERE fid_historial_medico = ? AND activo = 1 ORDER BY id_detalle DESC";
+
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setInt(1, idHistorialMedico); // fid_historial_medico en lugar de id_historial_medico
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     lista.add(this.load(rs.getInt(1)));
                 }
             }
-        } catch (SQLException e) { }
+        } catch (SQLException e) {
+            System.err.println("Error al listar Detalles: " + e.getMessage());
+        }
         return lista;
     }
 }

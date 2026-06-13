@@ -10,10 +10,8 @@ import java.util.List;
 
 public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
 
-    private Connection con;
-
     public EnfermedadCIE10DAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío: Ya no guardamos la conexión aquí para evitar fugas de memoria
     }
 
     @Override
@@ -21,7 +19,10 @@ public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
         int idGenerado = 0;
         String sql = "INSERT INTO EnfermedadCIE10 (codigo_cie, descripcion_oficial) VALUES (?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        // CORRECCIÓN: Abrimos la conexión localmente
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             pst.setString(1, objeto.getCodigoCIE());
             pst.setString(2, objeto.getDescripcionOficial());
 
@@ -44,7 +45,10 @@ public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
         int filasAfectadas = 0;
         String sql = "UPDATE EnfermedadCIE10 SET codigo_cie = ?, descripcion_oficial = ? WHERE id_enfermedad_cie10 = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Abrimos la conexión localmente
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setString(1, objeto.getCodigoCIE());
             pst.setString(2, objeto.getDescripcionOficial());
             pst.setInt(3, objeto.getIdEnfermedadCIE10());
@@ -56,7 +60,7 @@ public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
         return filasAfectadas;
     }
 
-    // Bloqueo estricto: Las normativas de la OMS son inmutables
+    // ¡EXCELENTE PRÁCTICA! Bloqueo estricto para catálogos inmutables
     @Override
     public int delete(int id) {
         throw new UnsupportedOperationException("Ilegal: No se permite eliminar códigos de diagnóstico internacional.");
@@ -67,7 +71,10 @@ public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
         EnfermedadCIE10 enfermedad = null;
         String sql = "SELECT * FROM EnfermedadCIE10 WHERE id_enfermedad_cie10 = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Abrimos la conexión localmente
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -86,10 +93,11 @@ public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
     @Override
     public List<EnfermedadCIE10> listALL() {
         List<EnfermedadCIE10> lista = new ArrayList<>();
-        // Ordenamos alfabéticamente por el código (ej. K01, K02) para que se vea bien en el Front-end
         String sql = "SELECT * FROM EnfermedadCIE10 ORDER BY codigo_cie ASC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql);
+        // CORRECCIÓN: Abrimos la conexión localmente
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
@@ -110,7 +118,10 @@ public class EnfermedadCIE10DAOImpl implements EnfermedadCIE10DAO {
         EnfermedadCIE10 enfermedad = null;
         String sql = "SELECT * FROM EnfermedadCIE10 WHERE codigo_cie = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Abrimos la conexión localmente
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setString(1, codigoCIE);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {

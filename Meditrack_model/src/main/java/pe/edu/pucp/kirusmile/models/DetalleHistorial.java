@@ -8,9 +8,10 @@ public class DetalleHistorial {
 
     // --- ATRIBUTOS PROPIOS ---
     private int idDetalle;               // ID como tipo primitivo int
-    private boolean estaCerrada;         // Indica si la atención ya finalizó
+    private boolean estaCerrada;         // Indica si la atención ya finalizó //solo si esta cerrada se pueden añadir notaAclaratoria
     private LocalDateTime fechaCierre;   // Fecha y hora exacta del cierre de la atención
     private String notaAclaratoria;      // Notas posteriores al cierre (si las hubiera)
+    private boolean activo; // ¡NUEVO! Atributo para el borrado lógico
 
     // --- RELACIONES DE ASOCIACIÓN (1 a 1) ---
     private HistorialMedico historialMedico; // A qué historial pertenece
@@ -112,9 +113,16 @@ public class DetalleHistorial {
     public void setListaTratamientos(List<Tratamiento> listaTratamientos) {
         this.listaTratamientos = listaTratamientos;
     }
-	
-	
-	/*
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    /*
 	
 	Observación: Almacenas estaCerrada (boolean) y fechaCierre (LocalDateTime).
 

@@ -5,9 +5,10 @@ import java.time.LocalDateTime;
 public class Diagnostico {
     // --- ATRIBUTOS PROPIOS ---
     private int idDiagnostico;
-    private String tipo;                  // Ej: "PRESUNTIVO" o "DEFINITIVO"
+    private TipoDiagnostico tipo;         // ¡Cambiado al Enum!
     private String observaciones;
     private LocalDateTime fechaHoraRegistro; // Mapeado de DateTime a LocalDateTime
+    private boolean activo;               // ¡NUEVO! Para el borrado lógico
 
     // --- RELACIONES ---
     private EnfermedadCIE10 enfermedadBase;  // Asociación con el catálogo de la OMS
@@ -16,9 +17,10 @@ public class Diagnostico {
     public Diagnostico() {
         // Truco pro: Cuando se crea un diagnóstico en Java, capturamos automáticamente el instante exacto
         this.fechaHoraRegistro = LocalDateTime.now();
+        this.activo = true; // Por defecto nace activo
     }
 
-    public Diagnostico(String tipo, String observaciones, EnfermedadCIE10 enfermedadBase) {
+    public Diagnostico(TipoDiagnostico tipo, String observaciones, EnfermedadCIE10 enfermedadBase) {
         this.tipo = tipo;
         this.observaciones = observaciones;
         this.enfermedadBase = enfermedadBase;
@@ -37,11 +39,11 @@ public class Diagnostico {
         this.idDiagnostico = idDiagnostico;
     }
 
-    public String getTipo() {
+    public TipoDiagnostico getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoDiagnostico tipo) {
         this.tipo = tipo;
     }
 
@@ -76,9 +78,16 @@ public class Diagnostico {
     public void setDetalleHistorial(DetalleHistorial detalleHistorial) {
         this.detalleHistorial = detalleHistorial;
     }
-	
-	
-	/*
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    /*
 	
 		Tienes private String tipo; // Ej: "PRESUNTIVO" o "DEFINITIVO"
 		Como solo hay dos opciones reales en medicina, sería ideal convertirlo en un Enum (así como hiciste con EstadoCita).

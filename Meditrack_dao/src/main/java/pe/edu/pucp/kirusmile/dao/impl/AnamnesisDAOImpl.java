@@ -3,27 +3,28 @@ package pe.edu.pucp.kirusmile.dao.impl;
 import pe.edu.pucp.kirusmile.dao.inter.AnamnesisDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
 import pe.edu.pucp.kirusmile.models.Anamnesis;
+import pe.edu.pucp.kirusmile.models.DetalleHistorial;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnamnesisDAOImpl implements AnamnesisDAO {
 
-    private Connection con;
-
     public AnamnesisDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío, la conexión se obtiene localmente
     }
 
     @Override
     public int save(Anamnesis objeto) {
-
         int idGenerado = 0;
+        // CORRECCIÓN: Se agrega el campo activo
         String sql = "INSERT INTO Anamnesis (fid_detalle, motivo_principal, tiempo_enfermedad, " +
-                "forma_inicio, relato_clinico, antecedentes_importantes) VALUES (?, ?, ?, ?, ?, ?)";
+                "forma_inicio, relato_clinico, antecedentes_importantes, activo) VALUES (?, ?, ?, ?, ?, ?, 1)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            // El idAnamnesis (PK de Java) actúa como el fid_detalle (FK de SQL) en esta relación 1:1
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             pst.setInt(1, objeto.getDetalleHistorial().getIdDetalle());
             pst.setString(2, objeto.getMotivoPrincipal());
             pst.setString(3, objeto.getTiempoEnfermedad());
@@ -36,6 +37,7 @@ public class AnamnesisDAOImpl implements AnamnesisDAO {
             try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
                     idGenerado = rs.getInt(1);
+                    objeto.setIdAnamnesis(idGenerado);
                 }
             }
         } catch (SQLException e) {
@@ -51,7 +53,9 @@ public class AnamnesisDAOImpl implements AnamnesisDAO {
                 "forma_inicio = ?, relato_clinico = ?, antecedentes_importantes = ? " +
                 "WHERE id_anamnesis = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setString(1, objeto.getMotivoPrincipal());
             pst.setString(2, objeto.getTiempoEnfermedad());
             pst.setString(3, objeto.getFormaInicio());
@@ -66,29 +70,46 @@ public class AnamnesisDAOImpl implements AnamnesisDAO {
         return filasAfectadas;
     }
 
-    // Bloqueado: La anamnesis es un documento legal histórico
     @Override
     public int delete(int id) {
-        return 0;
+        int resultado = 0;
+        // CORRECCIÓN: Borrado Lógico implementado
+        String sql = "UPDATE Anamnesis SET activo = 0 WHERE id_anamnesis = ?";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            resultado = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar Anamnesis: " + e.getMessage());
+        }
+        return resultado;
     }
 
     @Override
     public Anamnesis load(int id) {
         Anamnesis anamnesis = null;
-        String sql = "SELECT * FROM Anamnesis WHERE id_anamnesis = ?";
+        // CORRECCIÓN: Filtro por activo = 1
+        String sql = "SELECT * FROM Anamnesis WHERE id_anamnesis = ? AND activo = 1";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     anamnesis = new Anamnesis();
                     anamnesis.setIdAnamnesis(rs.getInt("id_anamnesis"));
-                    // fid_detalle no se mapea al objeto Java porque no existe ese campo en la clase
                     anamnesis.setMotivoPrincipal(rs.getString("motivo_principal"));
                     anamnesis.setTiempoEnfermedad(rs.getString("tiempo_enfermedad"));
                     anamnesis.setFormaInicio(rs.getString("forma_inicio"));
                     anamnesis.setRelatoClinico(rs.getString("relato_clinico"));
                     anamnesis.setAntecedentesImportantes(rs.getString("antecedentes_importantes"));
+                    anamnesis.setActivo(rs.getBoolean("activo")); // Seteamos el estado
+
+                    // CORRECCIÓN: Ensamblamos la llave foránea para no perderla
+                    DetalleHistorial detalle = new DetalleHistorial();
+                    detalle.setIdDetalle(rs.getInt("fid_detalle"));
+                    anamnesis.setDetalleHistorial(detalle);
                 }
             }
         } catch (SQLException e) {
@@ -97,16 +118,18 @@ public class AnamnesisDAOImpl implements AnamnesisDAO {
         return anamnesis;
     }
 
-    // No tiene sentido listar anamnesis de forma masiva por ahora
     @Override
     public List<Anamnesis> listALL() {
-        return List.of();
+        return new ArrayList<>(); // Vacío por requerimiento
     }
 
     @Override
     public Anamnesis obtenerPorFidDetalle(int fid_detalle) {
-        String sql = "SELECT id_anamnesis FROM Anamnesis WHERE fid_detalle = ?";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Filtro por activo = 1
+        String sql = "SELECT id_anamnesis FROM Anamnesis WHERE fid_detalle = ? AND activo = 1";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, fid_detalle);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {

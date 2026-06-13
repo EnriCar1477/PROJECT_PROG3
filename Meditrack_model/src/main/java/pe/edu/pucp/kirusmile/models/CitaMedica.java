@@ -14,6 +14,7 @@ public class CitaMedica {
     private LocalTime horaFin;
     private String motivoAgendamiento;
     private EstadoCita estado;
+    private boolean activo;    // AGREGADO: Para el borrado lógico (coherente con SQL)
 
     // --- ATRIBUTOS DE PAGO ---
     private double monto;
@@ -30,6 +31,8 @@ public class CitaMedica {
     public CitaMedica() {
         // Por defecto, toda cita nueva nace con estado PROGRAMADA
         this.estado = EstadoCita.PROGRAMADA;
+        this.activo=true;
+        this.fechaHoraPago=LocalDateTime.now();
     }
 
     public CitaMedica(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
@@ -148,5 +151,13 @@ public class CitaMedica {
 
     public void setPaciente(Paciente paciente) {
         this.paciente = paciente;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

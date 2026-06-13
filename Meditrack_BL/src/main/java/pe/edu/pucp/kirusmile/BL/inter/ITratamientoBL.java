@@ -16,4 +16,6 @@ public interface ITratamientoBL {
 
     // Método vital para el ensamblaje: Trae todos los tratamientos recetados en una consulta
     List<Tratamiento> listarPorFidDetalle(int fidDetalle);
+
+    public int eliminar(int idTratamiento);
 }

@@ -10,7 +10,7 @@ public class HistorialMedico {
 	private int idHistorial;
 	private LocalDateTime fechaCreacion;
 	private String estadoFisico;
-
+	private boolean activo; // ¡NUEVO! Atributo para el borrado lógico
 
 	// --- ATRIBUTOS DE RELACIÓN
 	private List<DetalleHistorial> listaDetalles;
@@ -21,6 +21,7 @@ public class HistorialMedico {
 	public HistorialMedico() {
 		// Vital: Inicializamos la lista para evitar NullPointerException al crear un historial nuevo
 		this.listaDetalles = new ArrayList<>();
+		this.activo = true; // Por defecto nace activo
 	}
 
 	public HistorialMedico(LocalDateTime fechaCreacion, String estadoFisico, List<DetalleHistorial> listaDetalles, Paciente paciente) {
@@ -73,5 +74,11 @@ public class HistorialMedico {
 		this.paciente = paciente;
 	}
 
+	public boolean isActivo() {
+		return activo;
+	}
 
+	public void setActivo(boolean activo) {
+		this.activo = activo;
+	}
 }

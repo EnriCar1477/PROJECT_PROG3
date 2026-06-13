@@ -81,6 +81,16 @@ public class PacienteBLImpl implements IPacienteBL {
         return pacienteDAO.listALL();
     }
 
+    @Override
+    public List<Paciente> listarPorFidMedico(int fidMedico) {
+        if (fidMedico <= 0) {
+            System.err.println("Error BL: El ID del médico no es válido para realizar la búsqueda.");
+            // Retornamos una lista vacía en lugar de null para evitar que Blazor falle iterando
+            return new java.util.ArrayList<>();
+        }
+        return pacienteDAO.listarPorFidMedico(fidMedico);
+    }
+
     // --- MÉTODOS PRIVADOS DE REGLAS DE NEGOCIO ---
     /**
      * Valida los datos heredados de la clase padre (Persona).

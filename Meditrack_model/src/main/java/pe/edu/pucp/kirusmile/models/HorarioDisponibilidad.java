@@ -7,7 +7,7 @@ import java.util.Date;
 public class HorarioDisponibilidad {
     // --- ATRIBUTOS PROPIOS ---
     private int idHorario;
-    private LocalDate fechaEspecifica; // Mapeado a LocalDate por ser fecha sin hora
+    private String diaSemana;           // Ej: "Lunes", "Martes" (Patrón semanal)
     private LocalTime horaInicio;      // Mapea perfectamente con TIME en MySQL
     private LocalTime horaFin;         // Mapea perfectamente con TIME en MySQL
     private boolean activo;            // Borrado lógico para turnos cancelados
@@ -19,8 +19,8 @@ public class HorarioDisponibilidad {
         this.activo = true; // Por defecto el horario nace disponible
     }
 
-    public HorarioDisponibilidad(LocalDate fechaEspecifica, LocalTime horaInicio, LocalTime horaFin) {
-        this.fechaEspecifica = fechaEspecifica;
+    public HorarioDisponibilidad(String diaSemana, LocalTime horaInicio, LocalTime horaFin) {
+        this.diaSemana = diaSemana;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
         this.activo = true;
@@ -37,12 +37,12 @@ public class HorarioDisponibilidad {
         this.idHorario = idHorario;
     }
 
-    public LocalDate getFechaEspecifica() {
-        return fechaEspecifica;
+    public String getDiaSemana() {
+        return diaSemana;
     }
 
-    public void setFechaEspecifica(LocalDate fechaEspecifica) {
-        this.fechaEspecifica = fechaEspecifica;
+    public void setDiaSemana(String diaSemana) {
+        this.diaSemana = diaSemana;
     }
 
     public LocalTime getHoraInicio() {

@@ -27,8 +27,11 @@ public class EmpleadoBLImpl implements IEmpleadoBL {
         }
 
         // Regla 1: El DNI debe ser único
-        // (Suponiendo que tienes un método en el DAO para buscar por DNI, similar al de Paciente)
-        // Empleado existenteDNI = empleadoDAO.obtenerPorDni(empleado.getDni());
+        Empleado existenteDNI = empleadoDAO.obtenerPorDni(empleado.getDni());
+        if (existenteDNI != null) {
+            System.err.println("Error BL: Ya existe un empleado registrado con el DNI " + empleado.getDni());
+            return 0; // Bloqueamos la creación
+        }
 
         // Regla 2: El Username debe ser estrictamente ÚNICO
         Empleado existenteUser = empleadoDAO.obtenerPorUsername(empleado.getUsername());
@@ -59,6 +62,13 @@ public class EmpleadoBLImpl implements IEmpleadoBL {
             return 0;
         }
 
+        // --- NUEVA REGLA (Agregada para evitar caídas de BD por DNI duplicado) ---
+        Empleado existenteDNI = empleadoDAO.obtenerPorDni(empleado.getDni());
+        if (existenteDNI != null && existenteDNI.getIdEmpleado() != empleado.getIdEmpleado()) {
+            System.err.println("Error BL: El DNI ingresado ya pertenece a otro empleado en el sistema.");
+            return 0;
+        }
+
         // Regla: Si cambia su username, verificar que no le quite el de otro
         Empleado existenteUser = empleadoDAO.obtenerPorUsername(empleado.getUsername());
         if (existenteUser != null && existenteUser.getIdEmpleado() != empleado.getIdEmpleado()) {
@@ -77,30 +87,25 @@ public class EmpleadoBLImpl implements IEmpleadoBL {
 
     @Override
     public Empleado autenticar(String username, String passwordPlana) {
-        // 1. Buscamos si el usuario existe
         Empleado empleado = empleadoDAO.obtenerPorUsername(username);
 
         if (empleado != null) {
-            // 2. Comparamos contraseñas
-            // (Si usaras BCrypt sería: BCrypt.checkpw(passwordPlana, empleado.getPasswordHash()))
-            // Para fines académicos básicos, hacemos una comparación directa si no usas hashes reales:
             if (empleado.getPasswordHash().equals(passwordPlana)) {
-
-                // 3. Regla de Negocio: Si la cuenta está inactiva o ya no labora, no entra.
                 if (!empleado.isEstadoLaboral()) {
                     System.err.println("Error Login: El usuario ya no labora en la clínica.");
                     return null;
                 }
 
-                // 4. Actualizamos su último acceso
-                empleado.setUltimoAcceso(LocalDateTime.now());
-                empleadoDAO.update(empleado); // Guardamos la hora de ingreso en la BD
-                // Devolvemos el objeto completo con su ROL adentro
-                return empleado; // Login Exitoso
+                // Usamos el método optimizado en lugar del update completo
+                LocalDateTime ahora = LocalDateTime.now();
+                empleadoDAO.registrarUltimoAcceso(empleado.getIdEmpleado(), ahora);
+                empleado.setUltimoAcceso(ahora);
+
+                return empleado;
             }
         }
         System.err.println("Error Login: Credenciales incorrectas.");
-        return null; // Login Fallido
+        return null;
     }
 
     @Override
@@ -165,6 +170,8 @@ public class EmpleadoBLImpl implements IEmpleadoBL {
         }
         return true;
     }
+
+
 
 
 }

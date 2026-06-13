@@ -10,10 +10,13 @@ public class Paciente extends Persona {
     private String gradoInstruccion;
     private String ocupacion;
     private String etnia;
+    private boolean activo; // CORRECCIÓN 1: Necesario para el borrado lógico
+
 
     // --- CONSTRUCTORES ---
     public Paciente() {
         super(); // Llama al constructor vacío de Persona
+        this.activo = true; // Por defecto el paciente nace activo
     }
 
     public Paciente(String grupoSanguineo, String factorRh, String gradoInstruccion, String ocupacion) {
@@ -72,5 +75,13 @@ public class Paciente extends Persona {
 
     public void setEtnia(String etnia) {
         this.etnia = etnia;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

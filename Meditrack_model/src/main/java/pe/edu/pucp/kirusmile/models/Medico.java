@@ -12,16 +12,21 @@ public class Medico extends Empleado {
 	private String rne;                // Registro Nacional de Especialista
 	private LocalDate fechaIngreso;    // Usamos LocalDate para fechas de calendario
 	private String firmaDigital;       // Ruta o representación de la firma
-
+	private boolean activo;
 
 	// --- RELACIONES ---
 	private Especialidad especialidad; // Un médico tiene una especialidad principal
 	private List<HorarioDisponibilidad> listaHorarios;
 
+	// NUEVO: Requerido por el DAO y para que coincida con el @medicoActual.Persona de Blazor
+	private Persona persona;
+
 	// --- CONSTRUCTORES ---
 	public Medico() {
 		super(); // Llama al constructor de Empleado
+		this.activo = true; // Por defecto nace activo
 		this.listaHorarios = new ArrayList<>();
+		this.persona = new Persona(); // Inicializamos para evitar NullReferenceException
 	}
 
 	public Medico(String cmp, String rne, Especialidad especialidad,
@@ -93,7 +98,24 @@ public class Medico extends Empleado {
 	public void setListaHorarios(List<HorarioDisponibilidad> listaHorarios) {
 		this.listaHorarios = listaHorarios;
 	}
-	
+
+	public Persona getPersona() {
+		return persona;
+	}
+
+	public void setPersona(Persona persona) {
+		this.persona = persona;
+	}
+
+	@Override
+	public boolean isActivo() {
+		return activo;
+	}
+
+	@Override
+	public void setActivo(boolean activo) {
+		this.activo = activo;
+	}
 	
 	/*
 	Sobre la firmaDigital en Medico.java

@@ -16,22 +16,32 @@ public class AnamnesisBLImpl implements IAnamnesisBL {
     @Override
     public int registrar(Anamnesis anamnesis) {
         // 1. Validar la Integridad Estructural
-        if (anamnesis.getDetalleHistorial() == null || anamnesis.getDetalleHistorial().getIdDetalle() == 0) {
-            System.err.println("Error BL: La anamnesis debe estar enlazada a una consulta médica (DetalleHistorial).");
+        if (anamnesis.getDetalleHistorial() == null || anamnesis.getDetalleHistorial().getIdDetalle() <= 0) {
+            System.err.println("Error BL: La anamnesis debe estar enlazada a una consulta médica válida.");
             return 0;
         }
 
-        // 2. Validaciones Médico-Legales (Reglas de Negocio)
-        if (!validarCamposObligatorios(anamnesis)) {
-            return 0; // Se bloquea la inserción si faltan datos críticos
+        // --- CORRECCIÓN CRÍTICA: Evitar colapso por UNIQUE KEY ---
+        Anamnesis existente = anamnesisDAO.obtenerPorFidDetalle(anamnesis.getDetalleHistorial().getIdDetalle());
+        if (existente != null) {
+            System.err.println("Error BL: Ya existe una anamnesis para esta consulta. Intente actualizar en lugar de registrar.");
+            // Truco Pro: Podrías simplemente redirigir la acción a actualizar(anamnesis) aquí,
+            // pero es mejor devolver 0 para que el Frontend sepa que intentó hacer la acción incorrecta.
+            return 0;
         }
 
+        // 2. Validaciones Médico-Legales
+        if (!validarCamposObligatorios(anamnesis)) {
+            return 0;
+        }
+
+        anamnesis.setActivo(true); // Aseguramos que nazca activo
         return anamnesisDAO.save(anamnesis);
     }
 
     @Override
     public int actualizar(Anamnesis anamnesis) {
-        if (anamnesis.getIdAnamnesis() == 0) {
+        if (anamnesis.getIdAnamnesis() <= 0) {
             System.err.println("Error BL: No se puede actualizar una anamnesis sin ID.");
             return 0;
         }
@@ -50,31 +60,45 @@ public class AnamnesisBLImpl implements IAnamnesisBL {
 
     @Override
     public Anamnesis obtenerPorFidDetalle(int fidDetalle) {
-        // Este método es crucial para que el DetalleHistorialBL pueda armar la vista completa
+        if (fidDetalle <= 0) return null;
         return anamnesisDAO.obtenerPorFidDetalle(fidDetalle);
     }
 
-
     // --- MÉTODOS PRIVADOS DE REGLAS DE NEGOCIO ---
+
     /**
-     * Valida que el médico haya llenado los campos que justifican la atención.
+     * Valida que el médico haya llenado los campos.
+     * Sincronizado con el comportamiento estricto del Frontend en Blazor.
      */
     private boolean validarCamposObligatorios(Anamnesis anamnesis) {
         if (anamnesis.getMotivoPrincipal() == null || anamnesis.getMotivoPrincipal().trim().isEmpty()) {
-            System.err.println("Error BL: El Motivo Principal de la consulta no puede estar vacío.");
+            System.err.println("Error BL: El Motivo Principal es obligatorio.");
             return false;
         }
-
+        if (anamnesis.getTiempoEnfermedad() == null || anamnesis.getTiempoEnfermedad().trim().isEmpty()) {
+            System.err.println("Error BL: El Tiempo de Enfermedad es obligatorio.");
+            return false;
+        }
+        if (anamnesis.getFormaInicio() == null || anamnesis.getFormaInicio().trim().isEmpty()) {
+            System.err.println("Error BL: La Forma de Inicio es obligatoria.");
+            return false;
+        }
+        if (anamnesis.getAntecedentesImportantes() == null || anamnesis.getAntecedentesImportantes().trim().isEmpty()) {
+            System.err.println("Error BL: Los Antecedentes son obligatorios.");
+            return false;
+        }
         if (anamnesis.getRelatoClinico() == null || anamnesis.getRelatoClinico().trim().isEmpty()) {
-            System.err.println("Error BL: El Relato Clínico es obligatorio para el historial.");
+            System.err.println("Error BL: El Relato Clínico es obligatorio.");
             return false;
         }
 
-        // El tiempo de enfermedad, forma de inicio y antecedentes pueden ser "No refiere" o dejarse en blanco
-        // dependiendo del nivel de urgencia, pero el Motivo y el Relato son indispensables.
+        // Limpieza de espacios en blanco al inicio y final para no guardar basura en la BD
+        anamnesis.setMotivoPrincipal(anamnesis.getMotivoPrincipal().trim());
+        anamnesis.setTiempoEnfermedad(anamnesis.getTiempoEnfermedad().trim());
+        anamnesis.setFormaInicio(anamnesis.getFormaInicio().trim());
+        anamnesis.setAntecedentesImportantes(anamnesis.getAntecedentesImportantes().trim());
+        anamnesis.setRelatoClinico(anamnesis.getRelatoClinico().trim());
 
         return true;
     }
-
-
 }

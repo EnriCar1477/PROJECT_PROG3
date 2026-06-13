@@ -11,11 +11,14 @@ public class Tratamiento{//TRATAMIENTO
     private String indicaciones;       // Ej: "Tomar Paracetamol cada 8 horas"
     private LocalDate fechaInicio;     // Usamos LocalDate (solo fecha, sin hora)
     private LocalDate fechaFin;        // Usamos LocalDate (solo fecha, sin hora)
+    private boolean activo;            // ¡NUEVO! Atributo para el borrado lógico
 
+    // --- RELACIONES ---
     private DetalleHistorial detalleHistorial;
 
     // --- CONSTRUCTORES ---
     public Tratamiento() {
+        this.activo = true; // Por defecto nace activo
     }
 
     public Tratamiento(TipoTratamiento tipo, String indicaciones, LocalDate fechaInicio, LocalDate fechaFin) {
@@ -23,6 +26,7 @@ public class Tratamiento{//TRATAMIENTO
         this.indicaciones = indicaciones;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
+        this.activo = true;
     }
 
     // --- GETTERS Y SETTERS ---
@@ -74,6 +78,14 @@ public class Tratamiento{//TRATAMIENTO
 
     public void setDetalleHistorial(DetalleHistorial detalleHistorial) {
         this.detalleHistorial = detalleHistorial;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }
 

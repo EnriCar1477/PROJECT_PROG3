@@ -2,6 +2,7 @@ package pe.edu.pucp.kirusmile.dao.impl;
 
 import pe.edu.pucp.kirusmile.dao.inter.TratamientoDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
+import pe.edu.pucp.kirusmile.models.DetalleHistorial;
 import pe.edu.pucp.kirusmile.models.TipoTratamiento;
 import pe.edu.pucp.kirusmile.models.Tratamiento;
 
@@ -10,32 +11,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TratamientoDAOImpl implements TratamientoDAO {
-    private Connection con;
 
     public TratamientoDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío: Ya no guardamos la conexión global para evitar fugas de memoria
     }
 
     @Override
     public int save(Tratamiento objeto) {
         int idGenerado = 0;
+        // CORRECCIÓN: Se agrega el campo activo
         String sql = "INSERT INTO Tratamiento (fid_detalle, fid_tipo_tratamiento, indicaciones, " +
-                "fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?)";
+                "fecha_inicio, fecha_fin, activo) VALUES (?, ?, ?, ?, ?, 1)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pst.setInt(1, objeto.getDetalleHistorial().getIdDetalle());
-            pst.setInt(2, objeto.getTipo().ordinal() + 1); // Asumiendo que el Enum mapea con ID numérico en BD
+            pst.setInt(2, objeto.getTipo().ordinal() + 1);
             pst.setString(3, objeto.getIndicaciones());
 
-            // --- CORRECCIÓN: PROTECCIÓN PARA FECHA DE INICIO ---
             if (objeto.getFechaInicio() != null) {
                 pst.setDate(4, java.sql.Date.valueOf(objeto.getFechaInicio()));
             } else {
                 pst.setNull(4, java.sql.Types.DATE);
             }
 
-            // --- CORRECCIÓN: PROTECCIÓN PARA FECHA DE FIN (CRÍTICO EN TRATAMIENTOS) ---
             if (objeto.getFechaFin() != null) {
                 pst.setDate(5, java.sql.Date.valueOf(objeto.getFechaFin()));
             } else {
@@ -62,12 +62,12 @@ public class TratamientoDAOImpl implements TratamientoDAO {
         String sql = "UPDATE Tratamiento SET fid_tipo_tratamiento = ?, indicaciones = ?, " +
                 "fecha_inicio = ?, fecha_fin = ? WHERE id_tratamiento = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setInt(1, objeto.getTipo().ordinal() + 1);
             pst.setString(2, objeto.getIndicaciones());
 
-            // --- CORRECCIONES EN UPDATE ---
             if (objeto.getFechaInicio() != null) {
                 pst.setDate(3, java.sql.Date.valueOf(objeto.getFechaInicio()));
             } else {
@@ -91,15 +91,28 @@ public class TratamientoDAOImpl implements TratamientoDAO {
 
     @Override
     public int delete(int id) {
-        throw new UnsupportedOperationException("Ilegal: No se permite borrar tratamientos del historial clínico.");
+        int resultado = 0;
+        // CORRECCIÓN: Borrado Lógico habilitado para el FrontEnd
+        String sql = "UPDATE Tratamiento SET activo = 0 WHERE id_tratamiento = ?";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            resultado = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar Tratamiento: " + e.getMessage());
+        }
+        return resultado;
     }
 
     @Override
     public Tratamiento load(int id) {
         Tratamiento tratamiento = null;
-        String sql = "SELECT * FROM Tratamiento WHERE id_tratamiento = ?";
+        // CORRECCIÓN: Filtro AND activo = 1
+        String sql = "SELECT * FROM Tratamiento WHERE id_tratamiento = ? AND activo = 1";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -110,14 +123,19 @@ public class TratamientoDAOImpl implements TratamientoDAO {
                     tratamiento.setTipo(TipoTratamiento.values()[idTipo - 1]);
 
                     tratamiento.setIndicaciones(rs.getString("indicaciones"));
+                    tratamiento.setActivo(rs.getBoolean("activo")); // Seteamos el estado
 
-                    // --- CORRECCIONES EN LOAD ---
                     if (rs.getDate("fecha_inicio") != null) {
                         tratamiento.setFechaInicio(rs.getDate("fecha_inicio").toLocalDate());
                     }
                     if (rs.getDate("fecha_fin") != null) {
                         tratamiento.setFechaFin(rs.getDate("fecha_fin").toLocalDate());
                     }
+
+                    // CORRECCIÓN: Ensamblaje de la consulta padre
+                    DetalleHistorial detalle = new DetalleHistorial();
+                    detalle.setIdDetalle(rs.getInt("fid_detalle"));
+                    tratamiento.setDetalleHistorial(detalle);
                 }
             }
         } catch (SQLException e) {
@@ -126,22 +144,24 @@ public class TratamientoDAOImpl implements TratamientoDAO {
         return tratamiento;
     }
 
-    //no se buscara todos los tratamientos por ahora
     @Override
     public List<Tratamiento> listALL() {
-        return List.of();// No se suelen listar todos masivamente
+        return new ArrayList<>(); // Vacío por requerimiento
     }
 
     @Override
     public List<Tratamiento> listarPorFidDetalle(int fid_detalle) {
         List<Tratamiento> lista = new ArrayList<>();
-        String sql = "SELECT id_tratamiento FROM Tratamiento WHERE fid_detalle = ? ORDER BY fecha_inicio ASC";
+        // CORRECCIÓN: Filtro AND activo = 1
+        String sql = "SELECT id_tratamiento FROM Tratamiento WHERE fid_detalle = ? AND activo = 1 ORDER BY fecha_inicio ASC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, fid_detalle);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(this.load(rs.getInt(1)));
+                    lista.add(this.load(rs.getInt(1))); // Reutilizamos el load
                 }
             }
         } catch (SQLException e) {

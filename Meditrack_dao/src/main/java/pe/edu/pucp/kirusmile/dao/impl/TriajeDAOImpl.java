@@ -2,28 +2,29 @@ package pe.edu.pucp.kirusmile.dao.impl;
 
 import pe.edu.pucp.kirusmile.dao.inter.TriajeDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
+import pe.edu.pucp.kirusmile.models.DetalleHistorial;
 import pe.edu.pucp.kirusmile.models.Triaje;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TriajeDAOImpl implements TriajeDAO {
 
-    private Connection con;
-
     public TriajeDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío: Ya no guardamos la conexión global
     }
 
     @Override
     public int save(Triaje objeto) {
         int idGenerado = 0;
-        // Usamos fid_detalle tal como está en tu nuevo script de SQL
-        String sql = "INSERT INTO Triaje (fid_detalle, peso, talla, presion_arterial, temperatura, saturacion) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        // CORRECCIÓN: Se agrega el campo activo = 1
+        String sql = "INSERT INTO Triaje (fid_detalle, peso, talla, presion_arterial, temperatura, saturacion, activo) " +
+                "VALUES (?, ?, ?, ?, ?, ?, 1)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            // El id_detalle (FK) viene del atributo idTriaje del objeto en este modelo 1:1
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             pst.setInt(1, objeto.getDetalleHistorial().getIdDetalle());
             pst.setDouble(2, objeto.getPeso());
             pst.setDouble(3, objeto.getTalla());
@@ -36,10 +37,11 @@ public class TriajeDAOImpl implements TriajeDAO {
             try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
                     idGenerado = rs.getInt(1);
+                    objeto.setIdTriaje(idGenerado);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al ejecutar save en Triaje: " + e.getMessage());
+            System.err.println("Error al guardar Triaje: " + e.getMessage());
         }
         return idGenerado;
     }
@@ -47,11 +49,12 @@ public class TriajeDAOImpl implements TriajeDAO {
     @Override
     public int update(Triaje objeto) {
         int filasAfectadas = 0;
-        // Aquí actualizamos por la PK id_triaje
         String sql = "UPDATE Triaje SET peso = ?, talla = ?, presion_arterial = ?, " +
                 "temperatura = ?, saturacion = ? WHERE id_triaje = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setDouble(1, objeto.getPeso());
             pst.setDouble(2, objeto.getTalla());
             pst.setString(3, objeto.getPresionArterial());
@@ -61,34 +64,51 @@ public class TriajeDAOImpl implements TriajeDAO {
 
             filasAfectadas = pst.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al ejecutar update en Triaje: " + e.getMessage());
+            System.err.println("Error al actualizar Triaje: " + e.getMessage());
         }
         return filasAfectadas;
     }
 
-    //REGLA: PROHIBIDO BORRAR DATOS
     @Override
     public int delete(int id) {
-        return 0;
+        int resultado = 0;
+        // CORRECCIÓN: Borrado Lógico
+        String sql = "UPDATE Triaje SET activo = 0 WHERE id_triaje = ?";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            resultado = pst.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar Triaje: " + e.getMessage());
+        }
+        return resultado;
     }
 
     @Override
     public Triaje load(int id) {
         Triaje triaje = null;
-        String sql = "SELECT * FROM Triaje WHERE id_triaje = ?";
+        // CORRECCIÓN: Filtro por activo
+        String sql = "SELECT * FROM Triaje WHERE id_triaje = ? AND activo = 1";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     triaje = new Triaje();
                     triaje.setIdTriaje(rs.getInt("id_triaje"));
-                    // fid_detalle no se setea al modelo Java porque no existe ese atributo en la clase
                     triaje.setPeso(rs.getDouble("peso"));
                     triaje.setTalla(rs.getDouble("talla"));
                     triaje.setPresionArterial(rs.getString("presion_arterial"));
                     triaje.setTemperatura(rs.getDouble("temperatura"));
                     triaje.setSaturacion(rs.getDouble("saturacion"));
+                    triaje.setActivo(rs.getBoolean("activo"));
+
+                    // CORRECCIÓN: Ensamblar llave foránea
+                    DetalleHistorial detalle = new DetalleHistorial();
+                    detalle.setIdDetalle(rs.getInt("fid_detalle"));
+                    triaje.setDetalleHistorial(detalle);
                 }
             }
         } catch (SQLException e) {
@@ -97,24 +117,21 @@ public class TriajeDAOImpl implements TriajeDAO {
         return triaje;
     }
 
-    // No se requiere listar todos los triajes del sistema
     @Override
-    public List<Triaje> listALL() {
-        return List.of();
-    }
+    public List<Triaje> listALL() { return new ArrayList<>(); }
 
     @Override
     public Triaje obtenerPorIdDetalle(int fid_detalle) {
-        String sql = "SELECT id_triaje FROM Triaje WHERE fid_detalle = ?";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Filtro por activo
+        String sql = "SELECT id_triaje FROM Triaje WHERE fid_detalle = ? AND activo = 1";
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, fid_detalle);
             try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return load(rs.getInt(1));
-                }
+                if (rs.next()) return load(rs.getInt(1));
             }
         } catch (SQLException e) {
-            System.err.println("Error en obtenerPorFidDetalle: " + e.getMessage());
+            System.err.println("Error en obtenerPorIdDetalle: " + e.getMessage());
         }
         return null;
     }

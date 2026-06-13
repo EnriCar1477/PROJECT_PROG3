@@ -103,33 +103,57 @@ public class MedicoDAOImpl implements MedicoDAO {
     @Override
     public Medico load(int id) {
         Medico medico = null;
-        String sql = "SELECT * FROM Medico WHERE id_medico = ?";
+
+        // CORRECCIÓN: Usamos INNER JOIN para traer los datos de Medico + Especialidad + Persona en una sola consulta
+        String sql = "SELECT m.id_medico, m.fid_empleado, m.cmp, m.rne, m.fecha_ingreso, m.firma_digital, " +
+                "e.id_especialidad, e.nombre_especialidad, e.costo_especialidad, " +
+                "p.id_persona, p.dni, p.nombres, p.apellido_paterno, p.apellido_materno, p.telefono, p.correo " +
+                "FROM Medico m " +
+                "INNER JOIN Especialidad e ON m.fid_especialidad = e.id_especialidad " +
+                "INNER JOIN Empleado emp ON m.fid_empleado = emp.id_empleado " +
+                "INNER JOIN Persona p ON emp.fid_persona = p.id_persona " +
+                "WHERE m.id_medico = ?";
 
         try (PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
+                    // 1. Datos del Médico
                     medico = new Medico();
                     medico.setIdMedico(rs.getInt("id_medico"));
-                    medico.setIdEmpleado(rs.getInt("fid_empleado")); // Heredado
+                    medico.setIdEmpleado(rs.getInt("fid_empleado"));
                     medico.setCmp(rs.getString("cmp"));
                     medico.setRne(rs.getString("rne"));
 
-                    // --- CORRECCIONES EN LOAD ---
                     if (rs.getDate("fecha_ingreso") != null) {
                         medico.setFechaIngreso(rs.getDate("fecha_ingreso").toLocalDate());
                     }
-
                     medico.setFirmaDigital(rs.getString("firma_digital"));
 
-                    // Ensamblaje básico de la especialidad
+                    // 2. Ensamblaje de la Especialidad completa
                     Especialidad esp = new Especialidad();
-                    esp.setIdEspecialidad(rs.getInt("fid_especialidad"));
+                    esp.setIdEspecialidad(rs.getInt("id_especialidad"));
+                    esp.setNombreEspecialidad(rs.getString("nombre_especialidad"));
+                    esp.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
                     medico.setEspecialidad(esp);
+
+                    // 3. Ensamblaje de la Persona completa (Requerido para la vista Blazor)
+                    // Asumo que tienes una clase Persona y Medico hereda o la tiene como atributo.
+                    // Ajusta el setPersona si usas herencia (ej: medico.setNombres(...))
+                    pe.edu.pucp.kirusmile.models.Persona persona = new pe.edu.pucp.kirusmile.models.Persona();
+                    persona.setIdPersona(rs.getInt("id_persona"));
+                    persona.setDni(rs.getString("dni"));
+                    persona.setNombres(rs.getString("nombres"));
+                    persona.setApellidoPaterno(rs.getString("apellido_paterno"));
+                    persona.setApellidoMaterno(rs.getString("apellido_materno"));
+                    persona.setTelefono(rs.getString("telefono"));
+                    persona.setCorreo(rs.getString("correo"));
+
+                    medico.setPersona(persona);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al cargar Medico: " + e.getMessage());
+            System.err.println("Error al cargar Medico Completo: " + e.getMessage());
         }
         return medico;
     }

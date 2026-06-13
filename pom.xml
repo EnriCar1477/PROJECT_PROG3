@@ -10,6 +10,8 @@
         <module>Meditrack_DBManager</module>
         <module>Meditrack_dao</module>
         <module>Meditrack_BL</module>
+        <module>Meditrack-REST</module>
+
     </modules>
     <groupId>pe.edu.pucp.kirusmile</groupId>
     <artifactId>TareaAcad</artifactId>

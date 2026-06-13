@@ -24,5 +24,5 @@ public interface IPacienteBL {
     // Lista a todos los pacientes activos
     List<Paciente> listarTodos();
 
-
+    public List<Paciente> listarPorFidMedico(int fidMedico);
 }

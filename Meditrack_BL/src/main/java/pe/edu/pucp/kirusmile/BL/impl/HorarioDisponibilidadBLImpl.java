@@ -22,12 +22,6 @@ public class HorarioDisponibilidadBLImpl implements IHorarioDisponibilidadBL {
             return 0;
         }
 
-        // Regla de Negocio Adicional: No permitir crear horarios en el pasado
-        if (horario.getFechaEspecifica().isBefore(LocalDate.now())) {
-            System.err.println("Error BL: No se pueden registrar disponibilidades en fechas pasadas.");
-            return 0;
-        }
-
         // Por defecto, el horario nace activo
         horario.setActivo(true);
 
@@ -72,7 +66,7 @@ public class HorarioDisponibilidadBLImpl implements IHorarioDisponibilidadBL {
     // --- MÉTODOS PRIVADOS DE REGLAS DE NEGOCIO ---
 
     /**
-     * Valida que las horas tengan sentido cronológico y que el horario pertenezca a un doctor.
+     * Valida que el patrón semanal tenga sentido cronológico y que pertenezca a un doctor.
      */
     private boolean validarReglasHorario(HorarioDisponibilidad horario) {
         // 1. Validar Pertenencia
@@ -81,11 +75,13 @@ public class HorarioDisponibilidadBLImpl implements IHorarioDisponibilidadBL {
             return false;
         }
 
-        // 2. Validar que no falten datos
-        if (horario.getFechaEspecifica() == null) {
-            System.err.println("Error BL: La fecha del horario es obligatoria.");
+        // 2. Validar que no falten datos de la plantilla
+        // CORRECCIÓN: Ahora validamos el diaSemana (String)
+        if (horario.getDiaSemana() == null || horario.getDiaSemana().trim().isEmpty()) {
+            System.err.println("Error BL: El día de la semana (Ej. Lunes) es obligatorio.");
             return false;
         }
+
         if (horario.getHoraInicio() == null || horario.getHoraFin() == null) {
             System.err.println("Error BL: Las horas de inicio y fin son obligatorias.");
             return false;
