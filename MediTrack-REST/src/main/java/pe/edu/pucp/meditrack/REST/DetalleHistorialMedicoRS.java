@@ -12,11 +12,11 @@ import java.util.List;
 @Path("/detalleHistorial")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class HistorialMedicoDetalleRS {
+public class DetalleHistorialMedicoRS {
 
     private IDetalleHistorialBL detalleBL;
 
-    public HistorialMedicoDetalleRS() {
+    public DetalleHistorialMedicoRS() {
         // Instanciamos la lógica de negocio
         this.detalleBL = new DetalleHistorialBLImpl();
     }
