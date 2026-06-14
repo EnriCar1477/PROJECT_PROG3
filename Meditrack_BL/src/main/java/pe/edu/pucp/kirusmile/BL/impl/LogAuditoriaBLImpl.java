@@ -6,6 +6,7 @@ import pe.edu.pucp.kirusmile.dao.inter.LogAuditoriaDAO;
 import pe.edu.pucp.kirusmile.models.LogAuditoria;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LogAuditoriaBLImpl implements ILogAuditoriaBL {
@@ -19,8 +20,9 @@ public class LogAuditoriaBLImpl implements ILogAuditoriaBL {
     @Override
     public int registrar(LogAuditoria log) {
         // 1. Validar al autor de la acción (Nunca puede haber un log anónimo)
-        if (log.getEmpleado() == null || log.getEmpleado().getIdEmpleado() == 0) {
-            System.err.println("Error de Seguridad [BL]: No se puede registrar una auditoría sin identificar al Empleado.");
+        // CORRECCIÓN DEFENSIVA: <= 0 en lugar de == 0
+        if (log.getEmpleado() == null || log.getEmpleado().getIdEmpleado() <= 0) {
+            System.err.println("Error de Seguridad [BL]: No se puede registrar una auditoría sin identificar un Empleado válido.");
             return 0;
         }
 
@@ -47,6 +49,8 @@ public class LogAuditoriaBLImpl implements ILogAuditoriaBL {
         return auditoriaDAO.save(log);
     }
 
+    // Nota: ¡Sin métodos actualizar() ni eliminar()! Cumpliendo el principio de inmutabilidad.
+
     @Override
     public LogAuditoria obtenerPorId(int idLogAuditoria) {
         if (idLogAuditoria <= 0) return null;
@@ -63,7 +67,7 @@ public class LogAuditoriaBLImpl implements ILogAuditoriaBL {
     public List<LogAuditoria> listarPorFidEmpleado(int fidEmpleado) {
         if (fidEmpleado <= 0) {
             System.err.println("Error BL: ID de empleado inválido para la búsqueda de auditorías.");
-            return null;
+            return new ArrayList<>(); // Es mejor retornar una lista vacía que un null para evitar NullPointerExceptions en el FrontEnd
         }
         return auditoriaDAO.listarPorFidEmpleado(fidEmpleado);
     }

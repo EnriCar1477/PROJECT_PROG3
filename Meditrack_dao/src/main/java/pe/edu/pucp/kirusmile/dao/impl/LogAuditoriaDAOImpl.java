@@ -11,14 +11,9 @@ import java.util.List;
 
 public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
 
-    // 1. Declaramos la conexión como atributo privado de la clase
-    private Connection con;
-
-    // 2. Inicializamos la conexión en el constructor
     public LogAuditoriaDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // CORRECCIÓN: Constructor vacío, ya no guardamos la conexión global para evitar fugas de memoria
     }
-
 
     @Override
     public int save(LogAuditoria objeto) {
@@ -26,8 +21,9 @@ public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
         String sql = "INSERT INTO LogAuditoria (fid_empleado, fecha_hora, accion_realizada, ip_terminal) " +
                 "VALUES (?, ?, ?, ?)";
 
-        // El try-with-resources ahora solo maneja el PreparedStatement
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        // CORRECCIÓN: Abrimos la Connection y el PreparedStatement de forma local y auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pst.setInt(1, objeto.getEmpleado().getIdEmpleado());
             pst.setTimestamp(2, Timestamp.valueOf(objeto.getFechaHora()));
@@ -48,13 +44,13 @@ public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
         return idGenerado;
     }
 
-    // REGLA DE SEGURIDAD ESTRICTA: Los logs son inmutables
+    // ¡PERFECTO! REGLA DE SEGURIDAD ESTRICTA: Los logs son inmutables
     @Override
     public int update(LogAuditoria objeto) {
         throw new UnsupportedOperationException("Violación de Seguridad: Un registro de auditoría jamás debe ser modificado.");
     }
 
-    // REGLA DE SEGURIDAD ESTRICTA: Los logs no se borran
+    // ¡PERFECTO! REGLA DE SEGURIDAD ESTRICTA: Los logs no se borran
     @Override
     public int delete(int id) {
         throw new UnsupportedOperationException("Violación de Seguridad: Un registro de auditoría jamás debe ser eliminado.");
@@ -65,7 +61,10 @@ public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
         LogAuditoria log = null;
         String sql = "SELECT * FROM LogAuditoria WHERE id_log_auditoria = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -91,7 +90,9 @@ public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
         List<LogAuditoria> lista = new ArrayList<>();
         String sql = "SELECT id_log_auditoria FROM LogAuditoria ORDER BY fecha_hora DESC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql);
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
@@ -108,7 +109,10 @@ public class LogAuditoriaDAOImpl implements LogAuditoriaDAO {
         List<LogAuditoria> lista = new ArrayList<>();
         String sql = "SELECT id_log_auditoria FROM LogAuditoria WHERE fid_empleado = ? ORDER BY fecha_hora DESC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, fid_empleado);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {

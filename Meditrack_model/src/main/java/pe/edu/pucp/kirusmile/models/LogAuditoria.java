@@ -11,11 +11,12 @@ public class LogAuditoria {
     private String accionRealizada;      // Ej: "Login exitoso", "Registro de nueva cita ID 5"
     private String ipTerminal;           // Ej: "192.168.1.15"
 
+    // --- RELACIONES ---
     private Empleado empleado;
 
     // --- CONSTRUCTORES ---
     public LogAuditoria() {
-        // Truco pro: El log captura automáticamente el instante en que ocurrió el evento
+        // Captura automáticamente el instante en que ocurrió el evento
         this.fechaHora = LocalDateTime.now();
     }
 
