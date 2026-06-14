@@ -69,8 +69,8 @@ public class PacienteBLImpl implements IPacienteBL {
 
     @Override
     public Paciente obtenerPorDni(String dni) {
-        if (dni == null || dni.trim().length() != 8) {
-            System.err.println("Error BL: El DNI debe tener exactamente 8 caracteres para la búsqueda.");
+        if (dni == null || dni.trim().length() < 8 || dni.trim().length() > 12) {
+            System.err.println("Error BL: El DNI debe tener entre 8 y 12 caracteres para la búsqueda.");
             return null;
         }
         return pacienteDAO.obtenerPorDni(dni.trim());
@@ -97,8 +97,8 @@ public class PacienteBLImpl implements IPacienteBL {
      */
 
     private boolean validarDatosPersonales(Paciente paciente) {
-        if (paciente.getDni() == null || paciente.getDni().trim().length() != 8) {
-            System.err.println("Error BL: El paciente debe tener un DNI válido de 8 dígitos.");
+        if (paciente.getDni() == null || paciente.getDni().trim().length() < 8 || paciente.getDni().trim().length() > 12) {
+            System.err.println("Error BL: El paciente debe tener un DNI o Carnet de Extranjería válido (entre 8 y 12 caracteres).");
             return false;
         }
         if (paciente.getNombres() == null || paciente.getNombres().trim().isEmpty()) {
@@ -113,11 +113,25 @@ public class PacienteBLImpl implements IPacienteBL {
             System.err.println("Error BL: La fecha de nacimiento es obligatoria para armar el historial médico.");
             return false;
         }
+        if (paciente.getCorreo() != null && !paciente.getCorreo().trim().isEmpty()) {
+            String correo = paciente.getCorreo().trim();
+            if (!correo.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                System.err.println("Error BL: El formato del correo electrónico no es válido.");
+                return false;
+            }
+            paciente.setCorreo(correo);
+        }
 
         // Limpiamos espacios
         paciente.setDni(paciente.getDni().trim());
         paciente.setNombres(paciente.getNombres().trim());
         paciente.setApellidoPaterno(paciente.getApellidoPaterno().trim());
+        if (paciente.getApellidoMaterno() != null) {
+            paciente.setApellidoMaterno(paciente.getApellidoMaterno().trim());
+        }
+        if (paciente.getTelefono() != null) {
+            paciente.setTelefono(paciente.getTelefono().trim());
+        }
 
         return true;
     }
@@ -144,6 +158,25 @@ public class PacienteBLImpl implements IPacienteBL {
                 return false;
             }
             paciente.setFactorRh(rh);
+        }
+
+        // Grado de instrucción de acuerdo a restricciones del frontend
+        if (paciente.getGradoInstruccion() != null && !paciente.getGradoInstruccion().trim().isEmpty()) {
+            String grado = paciente.getGradoInstruccion().trim();
+            if (!grado.equals("Sin instrucción") && !grado.equals("Inicial") && !grado.equals("Primaria") &&
+                    !grado.equals("Secundaria") && !grado.equals("Superior técnico") && !grado.equals("Universitario")) {
+                System.err.println("Error BL: El grado de instrucción no es válido.");
+                return false;
+            }
+            paciente.setGradoInstruccion(grado);
+        }
+
+        // Limpiamos espacios para campos opcionales
+        if (paciente.getOcupacion() != null) {
+            paciente.setOcupacion(paciente.getOcupacion().trim());
+        }
+        if (paciente.getEtnia() != null) {
+            paciente.setEtnia(paciente.getEtnia().trim());
         }
 
         return true;

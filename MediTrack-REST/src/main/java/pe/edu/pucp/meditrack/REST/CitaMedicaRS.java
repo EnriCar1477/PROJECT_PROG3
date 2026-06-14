@@ -64,5 +64,22 @@ public class CitaMedicaRS {
         return citaBL.listarPorFidPaciente(idPaciente);
     }
 
+    @PUT
+    @Path("/marcarPagado/{id}/{metodo}")
+    public int marcarPagado(@PathParam("id") int idCita,
+                            @PathParam("metodo") String metodoPago) {
+        return citaBL.marcarPagado(idCita, metodoPago);
+    }
 
+    @PUT
+    @Path("/marcarNoPagado/{id}")
+    public int marcarNoPagado(@PathParam("id") int idCita) {
+        return citaBL.marcarNoPagado(idCita);
+    }
+
+    @GET
+    @Path("/listarTodos")
+    public List<CitaMedica> listarTodos() {
+        return citaBL.listarTodos();
+    }
 }

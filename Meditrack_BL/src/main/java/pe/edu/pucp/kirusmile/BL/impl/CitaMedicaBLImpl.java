@@ -83,6 +83,36 @@ public class CitaMedicaBLImpl implements ICitaMedicaBL {
     }
 
     @Override
+    public int marcarPagado(int idCita, String metodoPago) {
+        CitaMedica cita = citaDAO.load(idCita);
+        if (cita == null) return 0;
+
+        // Regla: No pagar citas canceladas
+        if (cita.getEstado() == EstadoCita.CANCELADA) {
+            System.err.println("Error BL: No se puede registrar pago de una cita cancelada.");
+            return 0;
+        }
+
+        cita.setMetodoPago(metodoPago != null ? metodoPago.trim().toUpperCase() : "EFECTIVO");
+        cita.setFechaHoraPago(LocalDateTime.now());
+        cita.setEstado(EstadoCita.CONFIRMADA);
+
+        return citaDAO.update(cita);
+    }
+
+    @Override
+    public int marcarNoPagado(int idCita) {
+        CitaMedica cita = citaDAO.load(idCita);
+        if (cita == null) return 0;
+
+        cita.setMetodoPago(null);
+        cita.setFechaHoraPago(null);
+        cita.setEstado(EstadoCita.PROGRAMADA);
+
+        return citaDAO.update(cita);
+    }
+
+    @Override
     public CitaMedica obtenerPorId(int idCita) {
         return citaDAO.load(idCita);
     }
@@ -97,6 +127,11 @@ public class CitaMedicaBLImpl implements ICitaMedicaBL {
         return citaDAO.listarPorFidMedico(fidMedico);
     }
 
+    @Override
+    public List<CitaMedica> listarTodos() {
+        return citaDAO.listALL();
+    }
+
     private boolean validarReglasBasicas(CitaMedica cita) {
         if (cita.getPaciente() == null || cita.getPaciente().getIdPaciente() == 0) return false;
         if (cita.getMedicoAsignado() == null || cita.getMedicoAsignado().getIdMedico() == 0) return false;
@@ -104,6 +139,18 @@ public class CitaMedicaBLImpl implements ICitaMedicaBL {
         // Validación de coherencia de tiempo
         if (cita.getFecha() == null || cita.getHoraInicio() == null || cita.getHoraFin() == null) return false;
         if (!cita.getHoraInicio().isBefore(cita.getHoraFin())) return false;
+
+        // Regla de negocio: Debe empezar en punto xx:00
+        if (cita.getHoraInicio().getMinute() != 0 || cita.getHoraInicio().getSecond() != 0) {
+            System.err.println("Error BL: Las citas solo se pueden agendar en horas exactas (ej: 08:00, 09:00).");
+            return false;
+        }
+
+        // Regla de negocio: Debe durar exactamente una hora (60 minutos)
+        if (!cita.getHoraInicio().plusHours(1).equals(cita.getHoraFin())) {
+            System.err.println("Error BL: La cita debe durar exactamente una hora.");
+            return false;
+        }
 
         return true;
     }
