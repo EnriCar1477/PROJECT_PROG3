@@ -49,4 +49,5 @@ public class Cifrado {
             throw new RuntimeException(e);
         }
     }
+
 }

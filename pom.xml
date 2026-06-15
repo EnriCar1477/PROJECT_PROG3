@@ -10,7 +10,7 @@
         <module>Meditrack_DBManager</module>
         <module>Meditrack_dao</module>
         <module>Meditrack_BL</module>
-        <module>Meditrack-REST</module>
+        <module>Meditrack_API</module>
 
     </modules>
     <groupId>pe.edu.pucp.kirusmile</groupId>
