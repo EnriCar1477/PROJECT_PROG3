@@ -10,10 +10,8 @@ import java.util.List;
 
 public class EspecialidadDAOImpl implements EspecialidadDAO {
 
-    private Connection con;
-
     public EspecialidadDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío: Ya no guardamos la conexión global para evitar fugas de memoria
     }
 
     @Override
@@ -21,7 +19,10 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
         int idGenerado = 0;
         String sql = "INSERT INTO Especialidad (nombre_especialidad, costo_especialidad, activo) VALUES (?, ?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             pst.setString(1, objeto.getNombreEspecialidad());
             pst.setDouble(2, objeto.getCostoEspecialidad());
             pst.setBoolean(3, objeto.isActivo());
@@ -46,7 +47,10 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
         String sql = "UPDATE Especialidad SET nombre_especialidad = ?, costo_especialidad = ?, activo = ? " +
                 "WHERE id_especialidad = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setString(1, objeto.getNombreEspecialidad());
             pst.setDouble(2, objeto.getCostoEspecialidad());
             pst.setBoolean(3, objeto.isActivo());
@@ -59,13 +63,16 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
         return filasAfectadas;
     }
 
-    //usamos el borrado lógico! En lugar de un DELETE FROM, hacemos un UPDATE
     @Override
     public int delete(int id) {
         int filasAfectadas = 0;
+        // Excelente uso del borrado lógico
         String sql = "UPDATE Especialidad SET activo = 0 WHERE id_especialidad = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             filasAfectadas = pst.executeUpdate();
         } catch (SQLException e) {
@@ -79,7 +86,10 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
         Especialidad especialidad = null;
         String sql = "SELECT * FROM Especialidad WHERE id_especialidad = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -96,14 +106,14 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
         return especialidad;
     }
 
-    // Este método trae absolutamente todas (activas e inactivas) para el módulo de administración
     @Override
     public List<Especialidad> listALL() {
         List<Especialidad> lista = new ArrayList<>();
-
         String sql = "SELECT * FROM Especialidad ORDER BY nombre_especialidad ASC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql);
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
@@ -125,7 +135,10 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
         Especialidad especialidad = null;
         String sql = "SELECT * FROM Especialidad WHERE nombre_especialidad = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setString(1, nombreEspecialidad);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -145,10 +158,11 @@ public class EspecialidadDAOImpl implements EspecialidadDAO {
     @Override
     public List<Especialidad> listarActivas() {
         List<Especialidad> lista = new ArrayList<>();
-        // Este método trae solo las activas, ideal para llenar el ComboBox al registrar un nuevo Médico
         String sql = "SELECT * FROM Especialidad WHERE activo = 1 ORDER BY nombre_especialidad ASC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql);
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {

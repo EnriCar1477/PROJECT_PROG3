@@ -17,6 +17,10 @@ public interface ICitaMedicaBL {
     // Método financiero: Registra el pago de la cita y cambia el estado
     int registrarPago(int idCita, double monto, String metodoPago);
 
+    // Métodos para alternar el estado de pago sin borrar el monto
+    int marcarPagado(int idCita, String metodoPago);
+    int marcarNoPagado(int idCita);
+
     // Ensamblaje: Trae la cita con los datos básicos del paciente y médico
     CitaMedica obtenerPorId(int idCita);
 
@@ -25,4 +29,7 @@ public interface ICitaMedicaBL {
 
     // Para la vista del Médico (Su agenda del día/mes)
     List<CitaMedica> listarPorFidMedico(int fidMedico);
+
+    // Para la vista de Caja y Citas de la Secretaria
+    List<CitaMedica> listarTodos();
 }

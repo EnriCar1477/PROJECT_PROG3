@@ -36,8 +36,9 @@ public class EspecialidadBLImpl implements IEspecialidadBL {
 
     @Override
     public int actualizar(Especialidad especialidad) {
-        if (especialidad.getIdEspecialidad() == 0) {
-            System.err.println("Error BL: No se puede actualizar una especialidad sin su ID.");
+        // CORRECCIÓN DEFENSIVA: <= 0 en lugar de == 0
+        if (especialidad.getIdEspecialidad() <= 0) {
+            System.err.println("Error BL: No se puede actualizar una especialidad sin su ID válido.");
             return 0;
         }
 
@@ -57,7 +58,8 @@ public class EspecialidadBLImpl implements IEspecialidadBL {
 
     @Override
     public int eliminar(int idEspecialidad) {
-        if (idEspecialidad == 0) {
+        // CORRECCIÓN DEFENSIVA: <= 0 en lugar de == 0
+        if (idEspecialidad <= 0) {
             System.err.println("Error BL: ID de especialidad inválido para eliminar.");
             return 0;
         }
@@ -67,6 +69,7 @@ public class EspecialidadBLImpl implements IEspecialidadBL {
 
     @Override
     public Especialidad obtenerPorId(int idEspecialidad) {
+        if (idEspecialidad <= 0) return null;
         return especialidadDAO.load(idEspecialidad);
     }
 
@@ -98,11 +101,8 @@ public class EspecialidadBLImpl implements IEspecialidadBL {
         }
 
         // Estandarizamos el texto (quitamos espacios en blanco accidentales al inicio y al final)
-        // Opcional: podrías usar .toUpperCase() si quieres que todas las especialidades se guarden en mayúsculas.
         especialidad.setNombreEspecialidad(especialidad.getNombreEspecialidad().trim());
 
         return true;
     }
-
-
 }
