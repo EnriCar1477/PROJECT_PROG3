@@ -1,4 +1,4 @@
-package pe.edu.pucp.meditrack.REST;
+package pe.edu.pucp.kirusmile.services;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
