@@ -9,4 +9,5 @@ public interface CitaMedicaDAO extends BaseDAO<CitaMedica> {
     // Métodos especializados necesarios para la gestión de la clínica
     List<CitaMedica> listarPorFidMedico(int fid_medico);
     List<CitaMedica> listarPorFidPaciente(int fid_paciente);
+    List<CitaMedica> listarPorFidMedicoYFechas(int fid_medico, java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin);
 }

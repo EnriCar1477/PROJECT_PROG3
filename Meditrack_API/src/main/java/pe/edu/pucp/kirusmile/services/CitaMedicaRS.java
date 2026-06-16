@@ -59,6 +59,17 @@ public class CitaMedicaRS {
     }
 
     @GET
+    @Path("/listarPorMedicoYFechas/{idMedico}/{fechaInicio}/{fechaFin}")
+    public List<CitaMedica> listarPorFidMedicoYFechas(@PathParam("idMedico") int idMedico,
+                                                      @PathParam("fechaInicio") String fechaInicio,
+                                                      @PathParam("fechaFin") String fechaFin) {
+        return citaBL.listarPorFidMedicoYFechas(idMedico, 
+                java.time.LocalDate.parse(fechaInicio), 
+                java.time.LocalDate.parse(fechaFin));
+    }
+
+
+    @GET
     @Path("/listarPorPaciente/{idPaciente}")
     public List<CitaMedica> listarPorFidPaciente(@PathParam("idPaciente") int idPaciente) {
         return citaBL.listarPorFidPaciente(idPaciente);

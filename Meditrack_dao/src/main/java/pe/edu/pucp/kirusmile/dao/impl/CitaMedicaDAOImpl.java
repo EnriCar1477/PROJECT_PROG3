@@ -191,6 +191,24 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
         } catch (SQLException e) { }
         return lista;
     }
+
+    @Override
+    public List<CitaMedica> listarPorFidMedicoYFechas(int fid_medico, LocalDate fechaInicio, LocalDate fechaFin) {
+        List<CitaMedica> lista = new ArrayList<>();
+        String sql = "SELECT id_cita_medica FROM CitaMedica WHERE fid_medico = ? AND fecha BETWEEN ? AND ? AND activo = 1";
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, fid_medico);
+            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) lista.add(this.load(rs.getInt(1)));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar citas por médico y fechas: " + e.getMessage());
+        }
+        return lista;
+    }
+
 	
 	
 	/*

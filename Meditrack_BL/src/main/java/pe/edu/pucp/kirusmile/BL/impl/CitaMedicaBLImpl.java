@@ -128,6 +128,12 @@ public class CitaMedicaBLImpl implements ICitaMedicaBL {
     }
 
     @Override
+    public List<CitaMedica> listarPorFidMedicoYFechas(int fidMedico, LocalDate fechaInicio, LocalDate fechaFin) {
+        return citaDAO.listarPorFidMedicoYFechas(fidMedico, fechaInicio, fechaFin);
+    }
+
+
+    @Override
     public List<CitaMedica> listarTodos() {
         return citaDAO.listALL();
     }

@@ -30,6 +30,9 @@ public interface ICitaMedicaBL {
     // Para la vista del Médico (Su agenda del día/mes)
     List<CitaMedica> listarPorFidMedico(int fidMedico);
 
+    // Listar citas de un médico entre fechas
+    List<CitaMedica> listarPorFidMedicoYFechas(int fidMedico, java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin);
+
     // Para la vista de Caja y Citas de la Secretaria
     List<CitaMedica> listarTodos();
 }
