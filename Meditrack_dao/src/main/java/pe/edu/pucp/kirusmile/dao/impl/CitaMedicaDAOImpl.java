@@ -8,6 +8,7 @@ import pe.edu.pucp.kirusmile.models.Medico;
 import pe.edu.pucp.kirusmile.models.Paciente;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
