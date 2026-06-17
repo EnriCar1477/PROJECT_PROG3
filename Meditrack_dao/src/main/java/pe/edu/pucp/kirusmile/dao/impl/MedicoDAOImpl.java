@@ -11,24 +11,23 @@ import java.util.List;
 
 public class MedicoDAOImpl implements MedicoDAO {
 
-    private Connection con;
-
     public MedicoDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // CORRECCIÓN: Constructor vacío, eliminamos la conexión global
     }
 
     @Override
-    public int save(Medico objeto) {
+    public int save(pe.edu.pucp.kirusmile.models.Medico objeto) {
         int idGenerado = 0;
         String sql = "INSERT INTO Medico (fid_empleado, cmp, rne, fid_especialidad, fecha_ingreso, firma_digital) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        // CORRECCIÓN: Conexión local auto-cerrable
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pst.setInt(1, objeto.getIdEmpleado());
             pst.setString(2, objeto.getCmp());
 
-            // El RNE puede ser nulo en médicos generales
             if (objeto.getRne() != null) {
                 pst.setString(3, objeto.getRne());
             } else {
@@ -37,14 +36,18 @@ public class MedicoDAOImpl implements MedicoDAO {
 
             pst.setInt(4, objeto.getEspecialidad().getIdEspecialidad());
 
-            // --- CORRECCIÓN: PROTECCIÓN PARA FECHA DE INGRESO ---
             if (objeto.getFechaIngreso() != null) {
                 pst.setDate(5, java.sql.Date.valueOf(objeto.getFechaIngreso()));
             } else {
                 pst.setNull(5, java.sql.Types.DATE);
             }
 
-            pst.setString(6, objeto.getFirmaDigital());
+            // --- CORRECCIÓN DE LA FIRMA DIGITAL (byte[]) ---
+            if (objeto.getFirmaDigital() != null) {
+                pst.setBytes(6, objeto.getFirmaDigital());
+            } else {
+                pst.setNull(6, Types.BLOB);
+            }
 
             pst.executeUpdate();
 
@@ -61,12 +64,13 @@ public class MedicoDAOImpl implements MedicoDAO {
     }
 
     @Override
-    public int update(Medico objeto) {
+    public int update(pe.edu.pucp.kirusmile.models.Medico objeto) {
         int resultado = 0;
         String sql = "UPDATE Medico SET cmp = ?, rne = ?, fid_especialidad = ?, " +
                 "fecha_ingreso = ?, firma_digital = ? WHERE id_medico = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setString(1, objeto.getCmp());
 
@@ -78,14 +82,19 @@ public class MedicoDAOImpl implements MedicoDAO {
 
             pst.setInt(3, objeto.getEspecialidad().getIdEspecialidad());
 
-            // --- CORRECCIONES EN UPDATE ---
             if (objeto.getFechaIngreso() != null) {
                 pst.setDate(4, java.sql.Date.valueOf(objeto.getFechaIngreso()));
             } else {
                 pst.setNull(4, java.sql.Types.DATE);
             }
 
-            pst.setString(5, objeto.getFirmaDigital());
+            // --- CORRECCIÓN DE LA FIRMA DIGITAL (setBytes en plural) ---
+            if (objeto.getFirmaDigital() != null) {
+                pst.setBytes(5, objeto.getFirmaDigital());
+            } else {
+                pst.setNull(5, Types.BLOB);
+            }
+
             pst.setInt(6, objeto.getIdMedico());
 
             resultado = pst.executeUpdate();
@@ -97,14 +106,13 @@ public class MedicoDAOImpl implements MedicoDAO {
 
     @Override
     public int delete(int id) {
-        return 0;// Usualmente el borrado lógico se hace en la tabla Padre (Empleado)
+        return 0; // Usualmente el borrado lógico se hace en la tabla Padre (Empleado)
     }
 
     @Override
-    public Medico load(int id) {
-        Medico medico = null;
+    public pe.edu.pucp.kirusmile.models.Medico load(int id) {
+        pe.edu.pucp.kirusmile.models.Medico medico = null;
 
-        // CORRECCIÓN: Usamos INNER JOIN para traer los datos de Medico + Especialidad + Persona en una sola consulta
         String sql = "SELECT m.id_medico, m.fid_empleado, m.cmp, m.rne, m.fecha_ingreso, m.firma_digital, " +
                 "e.id_especialidad, e.nombre_especialidad, e.costo_especialidad, " +
                 "p.id_persona, p.dni, p.nombres, p.apellido_paterno, p.apellido_materno, p.telefono, p.correo " +
@@ -114,12 +122,13 @@ public class MedicoDAOImpl implements MedicoDAO {
                 "INNER JOIN Persona p ON emp.fid_persona = p.id_persona " +
                 "WHERE m.id_medico = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    // 1. Datos del Médico
-                    medico = new Medico();
+                    medico = new pe.edu.pucp.kirusmile.models.Medico();
                     medico.setIdMedico(rs.getInt("id_medico"));
                     medico.setIdEmpleado(rs.getInt("fid_empleado"));
                     medico.setCmp(rs.getString("cmp"));
@@ -128,18 +137,16 @@ public class MedicoDAOImpl implements MedicoDAO {
                     if (rs.getDate("fecha_ingreso") != null) {
                         medico.setFechaIngreso(rs.getDate("fecha_ingreso").toLocalDate());
                     }
-                    medico.setFirmaDigital(rs.getString("firma_digital"));
 
-                    // 2. Ensamblaje de la Especialidad completa
+                    // --- CORRECCIÓN DE LA FIRMA DIGITAL (getBytes) ---
+                    medico.setFirmaDigital(rs.getBytes("firma_digital"));
+
                     Especialidad esp = new Especialidad();
                     esp.setIdEspecialidad(rs.getInt("id_especialidad"));
                     esp.setNombreEspecialidad(rs.getString("nombre_especialidad"));
                     esp.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
                     medico.setEspecialidad(esp);
 
-                    // 3. Ensamblaje de la Persona completa (Requerido para la vista Blazor)
-                    // Asumo que tienes una clase Persona y Medico hereda o la tiene como atributo.
-                    // Ajusta el setPersona si usas herencia (ej: medico.setNombres(...))
                     pe.edu.pucp.kirusmile.models.Persona persona = new pe.edu.pucp.kirusmile.models.Persona();
                     persona.setIdPersona(rs.getInt("id_persona"));
                     persona.setDni(rs.getString("dni"));
@@ -159,11 +166,12 @@ public class MedicoDAOImpl implements MedicoDAO {
     }
 
     @Override
-    public List<Medico> listALL() {
-        List<Medico> lista = new ArrayList<>();
+    public List<pe.edu.pucp.kirusmile.models.Medico> listALL() {
+        List<pe.edu.pucp.kirusmile.models.Medico> lista = new ArrayList<>();
         String sql = "SELECT id_medico FROM Medico";
-        try (PreparedStatement pst = con.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
+              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 lista.add(this.load(rs.getInt(1)));
             }
@@ -174,9 +182,10 @@ public class MedicoDAOImpl implements MedicoDAO {
     }
 
     @Override
-    public Medico obtenerPorCMP(String cmp) {
+    public pe.edu.pucp.kirusmile.models.Medico obtenerPorCMP(String cmp) {
         String sql = "SELECT id_medico FROM Medico WHERE cmp = ?";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, cmp);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) return load(rs.getInt(1));
@@ -188,9 +197,10 @@ public class MedicoDAOImpl implements MedicoDAO {
     }
 
     @Override
-    public Medico obtenerPorFidEmpleado(int fid_empleado) {
+    public pe.edu.pucp.kirusmile.models.Medico obtenerPorFidEmpleado(int fid_empleado) {
         String sql = "SELECT id_medico FROM Medico WHERE fid_empleado = ?";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, fid_empleado);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) return load(rs.getInt(1));

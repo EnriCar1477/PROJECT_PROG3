@@ -11,7 +11,7 @@ public class Medico extends Empleado {
 	private String cmp;                // Colegio Médico del Perú
 	private String rne;                // Registro Nacional de Especialista
 	private LocalDate fechaIngreso;    // Usamos LocalDate para fechas de calendario
-	private String firmaDigital;       // Ruta o representación de la firma
+	private byte[] firmaDigital;       // Ruta o representación de la firma
 	private boolean activo;
 
 	// --- RELACIONES ---
@@ -30,7 +30,7 @@ public class Medico extends Empleado {
 	}
 
 	public Medico(String cmp, String rne, Especialidad especialidad,
-	              LocalDate fechaIngreso, String firmaDigital) {
+	              LocalDate fechaIngreso, byte[] firmaDigital) {
 		super();
 		this.cmp = cmp;
 		this.rne = rne;
@@ -75,11 +75,11 @@ public class Medico extends Empleado {
 		this.fechaIngreso = fechaIngreso;
 	}
 
-	public String getFirmaDigital() {
+	public byte[] getFirmaDigital() {
 		return firmaDigital;
 	}
 
-	public void setFirmaDigital(String firmaDigital) {
+	public void setFirmaDigital(byte[] firmaDigital) {
 		this.firmaDigital = firmaDigital;
 	}
 
