@@ -16,7 +16,6 @@ public class DBManager {
     private final String user;
     private final String password;
     private final String DB_CREDENTIALS_FILE = "db.properties";
-    private Connection connection;
 
     private DBManager() {
 
@@ -52,12 +51,17 @@ public class DBManager {
         return instance;
     }
 
-    public synchronized Connection getConnection() {
+    public Connection getConnection() {
+        Connection conn = TransactionContext.getActiveConnection();
+        if (conn != null) {
+            return conn;
+        }
+        return newConnection();
+    }
+
+    public Connection newConnection() {
         try {
-            if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(url, user, Cifrado.descifrar(password));
-            }
-            return connection;
+            return DriverManager.getConnection(url, user, Cifrado.descifrar(password));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

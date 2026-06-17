@@ -94,8 +94,17 @@ public class DetalleHistorialBLImpl implements IDetalleHistorialBL {
 
     @Override
     public List<DetalleHistorial> listarPorFidHistorial(int fidHistorial) {
-        // Para listar en la tabla de historial, normalmente no ensamblamos todo el peso de los
-        // tratamientos y diagnósticos para no saturar la memoria. Solo traemos los datos básicos.
-        return detalleDAO.listarPorHistorial(fidHistorial);
+        // Para listar en la tabla de historial, realizamos el ensamblaje para que el frontend pueda comprobar
+        // el estado completado/pendiente de cada sección (Triaje, Anamnesis, Diagnósticos, Tratamientos).
+        List<DetalleHistorial> lista = detalleDAO.listarPorHistorial(fidHistorial);
+        if (lista != null) {
+            for (DetalleHistorial detalle : lista) {
+                detalle.setTriaje(triajeDAO.obtenerPorIdDetalle(detalle.getIdDetalle()));
+                detalle.setAnamnesis(anamnesisDAO.obtenerPorFidDetalle(detalle.getIdDetalle()));
+                detalle.setListaDiagnosticos(diagnosticoDAO.listarPorFidDetalle(detalle.getIdDetalle()));
+                detalle.setListaTratamientos(tratamientoDAO.listarPorFidDetalle(detalle.getIdDetalle()));
+            }
+        }
+        return lista;
     }
 }

@@ -14,10 +14,8 @@ import java.util.List;
 
 public class CitaMedicaDAOImpl implements CitaMedicaDAO {
 
-    private Connection con;
-
     public CitaMedicaDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío: ya no guardamos la conexión en un atributo global
     }
 
     @Override
@@ -32,7 +30,9 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
                 "hora_inicio, hora_fin, motivo_agendamiento, fid_estado_cita, monto, " +
                 "fecha_hora_pago, metodo_pago) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
             pst.setInt(1, objeto.getPaciente().getIdPaciente());
             pst.setInt(2, objeto.getMedicoAsignado().getIdMedico());
 
@@ -68,7 +68,9 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
                 "motivo_agendamiento = ?, fid_estado_cita = ?, monto = ?, " +
                 "fecha_hora_pago = ?, metodo_pago = ? WHERE id_cita_medica = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setDate(1, java.sql.Date.valueOf(objeto.getFecha()));
             pst.setTime(2, java.sql.Time.valueOf(objeto.getHoraInicio()));
             pst.setTime(3, java.sql.Time.valueOf(objeto.getHoraFin()));
@@ -95,7 +97,8 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     @Override
     public int delete(int id) {
         String sql = "UPDATE CitaMedica SET activo = 0 WHERE id_cita_medica = ?";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             return pst.executeUpdate();
         } catch (SQLException e) { return 0; }
@@ -104,7 +107,7 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     @Override
     public CitaMedica load(int id) {
         CitaMedica cita = null;
-        String sql = "SELECT c.*, p.nombres AS p_nombres, p.apellido_paterno AS p_ap, " +
+        String sql = "SELECT c.*, p.nombres AS p_nombres, p.apellido_paterno AS p_ap, p.apellido_materno AS p_am, " +
                 "per_m.nombres AS m_nombres, per_m.apellido_paterno AS m_ap " +
                 "FROM CitaMedica c " +
                 "INNER JOIN Paciente pac ON c.fid_paciente = pac.id_paciente " +
@@ -114,7 +117,9 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
                 "INNER JOIN Persona per_m ON emp.fid_persona = per_m.id_persona " +
                 "WHERE c.id_cita_medica = ? AND c.activo = 1";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -140,6 +145,7 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
                     p.setIdPaciente(rs.getInt("fid_paciente"));
                     p.setNombres(rs.getString("p_nombres"));
                     p.setApellidoPaterno(rs.getString("p_ap"));
+                    p.setApellidoMaterno(rs.getString("p_am"));
                     cita.setPaciente(p);
 
                     // Ensamblaje Médico
@@ -158,7 +164,8 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     public List<CitaMedica> listALL() {
         List<CitaMedica> lista = new ArrayList<>();
         String sql = "SELECT id_cita_medica FROM CitaMedica WHERE activo = 1 ORDER BY fecha DESC";
-        try (PreparedStatement pst = con.prepareStatement(sql);
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 lista.add(this.load(rs.getInt(1)));
@@ -171,7 +178,9 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     public List<CitaMedica> listarPorFidMedico(int fid_medico) {
         List<CitaMedica> lista = new ArrayList<>();
         String sql = "SELECT id_cita_medica FROM CitaMedica WHERE fid_medico = ? AND activo = 1";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, fid_medico);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) lista.add(this.load(rs.getInt(1)));
@@ -184,7 +193,9 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     public List<CitaMedica> listarPorFidPaciente(int fid_paciente) {
         List<CitaMedica> lista = new ArrayList<>();
         String sql = "SELECT id_cita_medica FROM CitaMedica WHERE fid_paciente = ? AND activo = 1";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, fid_paciente);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) lista.add(this.load(rs.getInt(1)));
@@ -197,7 +208,9 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     public List<CitaMedica> listarPorFidMedicoYFechas(int fid_medico, LocalDate fechaInicio, LocalDate fechaFin) {
         List<CitaMedica> lista = new ArrayList<>();
         String sql = "SELECT id_cita_medica FROM CitaMedica WHERE fid_medico = ? AND fecha BETWEEN ? AND ? AND activo = 1";
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, fid_medico);
             pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
             pst.setDate(3, java.sql.Date.valueOf(fechaFin));
@@ -209,25 +222,4 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
         }
         return lista;
     }
-
-	
-	
-	/*
-	
-	Cuidado con los Enums al guardar en Base de Datos
-	En tu CitaMedicaDAOImpl, guardas el estado de la cita (fid_estado_cita). 
-	Recuerda que en Java, EstadoCita es un Enum (PROGRAMADA, CANCELADA, etc.).
-	Dependiendo de cómo hiciste tu base de datos, tienes dos opciones correctas para enviarlo 
-	en el PreparedStatement:
-	
-	Si en tu MySQL el estado es un VARCHAR (Texto):
-	pst.setString(8, objeto.getEstado().name()); // Guarda "PROGRAMADA"
-	
-	Si en tu MySQL el estado es un INT (Foreign Key a una tabla de estados):
-	// ordinal() empieza en 0, le sumamos 1 para que coincida con el ID de la base de datos (1, 2, 3...)
-	pst.setInt(8, objeto.getEstado().ordinal() + 1);
-	
-	
-	*/
-	
 }

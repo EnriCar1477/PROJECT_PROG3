@@ -9,27 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
-    private Connection con;
 
     public HorarioDisponibilidadDAOImpl() {
-        this.con = DBManager.getInstance().getConnection();
+        // Constructor vacío: ya no guardamos la conexión en un atributo global
     }
 
     @Override
     public int save(HorarioDisponibilidad objeto) {
         int idGenerado = 0;
-        // Usamos fid_medico tal como definimos en el script SQL
         String sql = "INSERT INTO HorarioDisponibilidad (fid_medico, dia_semana, " +
                 "hora_inicio, hora_fin, activo) VALUES (?, ?, ?, ?, 1)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            // 1. Vinculamos con el médico (Asumiendo que el objeto tiene la referencia)
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
             pst.setInt(1, objeto.getMedico().getIdMedico());
-
-            // 2. dia de semana
             pst.setString(2, objeto.getDiaSemana());
-
-            // 3. Mapeo de LocalTime a java.sql.Time (Manejo de horas en JDBC)
             pst.setTime(3, java.sql.Time.valueOf(objeto.getHoraInicio()));
             pst.setTime(4, java.sql.Time.valueOf(objeto.getHoraFin()));
 
@@ -53,7 +48,9 @@ public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
         String sql = "UPDATE HorarioDisponibilidad SET dia_semana = ?, hora_inicio = ?, " +
                 "hora_fin = ? WHERE id_horario = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setString(1, objeto.getDiaSemana());
             pst.setTime(2, java.sql.Time.valueOf(objeto.getHoraInicio()));
             pst.setTime(3, java.sql.Time.valueOf(objeto.getHoraFin()));
@@ -69,10 +66,11 @@ public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
     @Override
     public int delete(int id) {
         int filasAfectadas = 0;
-        // Aplicamos borrado lógico (activo = 0) para no romper citas pasadas
         String sql = "UPDATE HorarioDisponibilidad SET activo = 0 WHERE id_horario = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, id);
             filasAfectadas = pst.executeUpdate();
         } catch (SQLException e) {
@@ -86,7 +84,9 @@ public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
         HorarioDisponibilidad horario = null;
         String sql = "SELECT * FROM HorarioDisponibilidad WHERE id_horario = ? AND activo = 1";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -103,7 +103,6 @@ public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
         return horario;
     }
 
-    // No se usa listar todos los horarios de todos los médicos a la vez
     @Override
     public List<HorarioDisponibilidad> listALL() {
         return List.of();
@@ -115,7 +114,9 @@ public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
         String sql = "SELECT id_horario FROM HorarioDisponibilidad WHERE fid_medico = ? AND activo = 1 " +
                 "ORDER BY FIELD(dia_semana, 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'), hora_inicio ASC";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
             pst.setInt(1, fid_medico);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
@@ -127,5 +128,4 @@ public class HorarioDisponibilidadDAOImpl implements HorarioDisponibilidadDAO {
         }
         return lista;
     }
-
 }
