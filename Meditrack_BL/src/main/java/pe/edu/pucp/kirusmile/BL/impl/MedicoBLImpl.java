@@ -1,8 +1,10 @@
 package pe.edu.pucp.kirusmile.BL.impl;
 
 import pe.edu.pucp.kirusmile.BL.inter.IMedicoBL;
+import pe.edu.pucp.kirusmile.dao.impl.EmpleadoDAOImpl;
 import pe.edu.pucp.kirusmile.dao.impl.HorarioDisponibilidadDAOImpl;
 import pe.edu.pucp.kirusmile.dao.impl.MedicoDAOImpl;
+import pe.edu.pucp.kirusmile.dao.inter.EmpleadoDAO;
 import pe.edu.pucp.kirusmile.dao.inter.HorarioDisponibilidadDAO;
 import pe.edu.pucp.kirusmile.dao.inter.MedicoDAO;
 import pe.edu.pucp.kirusmile.models.Medico;
@@ -14,18 +16,34 @@ public class MedicoBLImpl implements IMedicoBL {
 
     private MedicoDAO medicoDAO;
     private HorarioDisponibilidadDAO horarioDAO;
+    private EmpleadoDAO empleadoDAO;
 
     public MedicoBLImpl() {
         this.medicoDAO = new MedicoDAOImpl();
         this.horarioDAO = new HorarioDisponibilidadDAOImpl();
+        this.empleadoDAO = new EmpleadoDAOImpl();
     }
 
     @Override
     public int registrar(Medico medico) {
-        // 1. Validar integridad referencial (debe ser un empleado primero)
+        // 1. Si es un médico nuevo sin registro base, registramos primero la parte de Empleado y Persona
         if (medico.getIdEmpleado() == 0) {
-            System.err.println("Error BL: El médico debe estar vinculado a un registro de Empleado válido.");
-            return 0;
+            // Regla: El DNI debe ser único
+            if (empleadoDAO.obtenerPorDni(medico.getDni()) != null) {
+                System.err.println("Error BL: Ya existe un empleado/médico registrado con el DNI " + medico.getDni());
+                return 0;
+            }
+            // Regla: El Username debe ser único
+            if (empleadoDAO.obtenerPorUsername(medico.getUsername()) != null) {
+                System.err.println("Error BL: El nombre de usuario '" + medico.getUsername() + "' ya está en uso.");
+                return 0;
+            }
+            int idEmpleadoGenerado = empleadoDAO.save(medico);
+            if (idEmpleadoGenerado == 0) {
+                System.err.println("Error BL: No se pudo registrar el Empleado base para el médico.");
+                return 0;
+            }
+            medico.setIdEmpleado(idEmpleadoGenerado);
         }
 
         // 2. Validaciones Médico-Legales
@@ -49,6 +67,13 @@ public class MedicoBLImpl implements IMedicoBL {
         }
 
         if (!validarCredenciales(medico)) {
+            return 0;
+        }
+
+        // También actualizamos la parte de Persona y Empleado
+        int resEmpleado = empleadoDAO.update(medico);
+        if (resEmpleado == 0) {
+            System.err.println("Error BL: No se pudo actualizar el Empleado base para el médico.");
             return 0;
         }
 
