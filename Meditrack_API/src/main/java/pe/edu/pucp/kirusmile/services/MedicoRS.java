@@ -56,4 +56,11 @@ public class MedicoRS {
     public List<Medico> listarTodos() {
         return medicoBL.listarTodos();
     }
+
+    @GET
+    @Path("/listarMedicosDatosBasicos")
+    public List<Medico> listarMedicosDatosBasicos() {
+        return medicoBL.listarMedicosDatosBasicos();
+    }
 }
+

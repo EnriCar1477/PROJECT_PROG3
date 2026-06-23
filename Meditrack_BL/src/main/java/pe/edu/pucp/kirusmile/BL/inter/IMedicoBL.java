@@ -20,4 +20,7 @@ public interface IMedicoBL {
     // Lista a todos los médicos para el módulo de administración
     List<Medico> listarTodos();
 
+    // Lista a los médicos con información básica para listados optimizados
+    List<Medico> listarMedicosDatosBasicos();
 }
+

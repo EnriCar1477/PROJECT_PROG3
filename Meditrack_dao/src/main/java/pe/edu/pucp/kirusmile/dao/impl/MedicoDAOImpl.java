@@ -115,6 +115,8 @@ public class MedicoDAOImpl implements MedicoDAO {
 
         String sql = "SELECT m.id_medico, m.fid_empleado, m.cmp, m.rne, m.fecha_ingreso, m.firma_digital, " +
                 "e.id_especialidad, e.nombre_especialidad, e.costo_especialidad, " +
+                "emp.codigo_empleado, emp.username, emp.password_hash, emp.estado_laboral, " +
+                "emp.fecha_vinculacion, emp.fid_rol_usuario, emp.activo as emp_activo, " +
                 "p.id_persona, p.dni, p.nombres, p.apellido_paterno, p.apellido_materno, p.telefono, p.correo " +
                 "FROM Medico m " +
                 "INNER JOIN Especialidad e ON m.fid_especialidad = e.id_especialidad " +
@@ -147,6 +149,21 @@ public class MedicoDAOImpl implements MedicoDAO {
                     esp.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
                     medico.setEspecialidad(esp);
 
+                    // --- Datos del Empleado ---
+                    medico.setCodigoEmpleado(rs.getString("codigo_empleado"));
+                    medico.setUsername(rs.getString("username"));
+                    medico.setPasswordHash(rs.getString("password_hash"));
+                    medico.setEstadoLaboral(rs.getBoolean("estado_laboral"));
+                    medico.setActivo(rs.getBoolean("emp_activo"));
+                    if (rs.getDate("fecha_vinculacion") != null) {
+                        medico.setFechaVinculacion(rs.getDate("fecha_vinculacion").toLocalDate());
+                    }
+                    int idRol = rs.getInt("fid_rol_usuario");
+                    if (idRol >= 1 && idRol <= pe.edu.pucp.kirusmile.models.RolUsuario.values().length) {
+                        medico.setRol(pe.edu.pucp.kirusmile.models.RolUsuario.values()[idRol - 1]);
+                    }
+
+                    // --- Datos de Persona ---
                     pe.edu.pucp.kirusmile.models.Persona persona = new pe.edu.pucp.kirusmile.models.Persona();
                     persona.setIdPersona(rs.getInt("id_persona"));
                     persona.setDni(rs.getString("dni"));
@@ -180,6 +197,61 @@ public class MedicoDAOImpl implements MedicoDAO {
         }
         return lista;
     }
+
+    @Override
+    public List<pe.edu.pucp.kirusmile.models.Medico> listarMedicosDatosBasicos() {
+        List<pe.edu.pucp.kirusmile.models.Medico> lista = new ArrayList<>();
+        String sql = "SELECT m.id_medico, m.fid_empleado, m.cmp, m.rne, m.activo as medico_activo, " +
+                "e.id_especialidad, e.nombre_especialidad, e.costo_especialidad, " +
+                "p.id_persona, p.dni, p.nombres, p.apellido_paterno, p.apellido_materno, p.telefono, p.correo, " +
+                "emp.username, emp.activo as emp_activo " +
+                "FROM Medico m " +
+                "INNER JOIN Especialidad e ON m.fid_especialidad = e.id_especialidad " +
+                "INNER JOIN Empleado emp ON m.fid_empleado = emp.id_empleado " +
+                "INNER JOIN Persona p ON emp.fid_persona = p.id_persona";
+
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                pe.edu.pucp.kirusmile.models.Medico medico = new pe.edu.pucp.kirusmile.models.Medico();
+                medico.setIdMedico(rs.getInt("id_medico"));
+                medico.setIdEmpleado(rs.getInt("fid_empleado"));
+                medico.setCmp(rs.getString("cmp"));
+                medico.setRne(rs.getString("rne"));
+                medico.setActivo(rs.getBoolean("medico_activo"));
+
+                // Dejamos la firma digital, fechas y campos pesados nulos para eficiencia
+                medico.setFirmaDigital(null);
+                medico.setFechaIngreso(null);
+
+                Especialidad esp = new Especialidad();
+                esp.setIdEspecialidad(rs.getInt("id_especialidad"));
+                esp.setNombreEspecialidad(rs.getString("nombre_especialidad"));
+                esp.setCostoEspecialidad(rs.getDouble("costo_especialidad"));
+                medico.setEspecialidad(esp);
+
+                pe.edu.pucp.kirusmile.models.Persona persona = new pe.edu.pucp.kirusmile.models.Persona();
+                persona.setIdPersona(rs.getInt("id_persona"));
+                persona.setDni(rs.getString("dni"));
+                persona.setNombres(rs.getString("nombres"));
+                persona.setApellidoPaterno(rs.getString("apellido_paterno"));
+                persona.setApellidoMaterno(rs.getString("apellido_materno"));
+                persona.setTelefono(rs.getString("telefono"));
+                persona.setCorreo(rs.getString("correo"));
+                medico.setPersona(persona);
+
+                medico.setUsername(rs.getString("username"));
+                medico.setActivo(rs.getBoolean("emp_activo"));
+
+                lista.add(medico);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar Medicos Datos Basicos: " + e.getMessage());
+        }
+        return lista;
+    }
+
 
     @Override
     public pe.edu.pucp.kirusmile.models.Medico obtenerPorCMP(String cmp) {

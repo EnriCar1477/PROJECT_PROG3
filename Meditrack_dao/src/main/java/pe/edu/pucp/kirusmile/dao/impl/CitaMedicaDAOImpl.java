@@ -3,9 +3,12 @@ package pe.edu.pucp.kirusmile.dao.impl;
 import pe.edu.pucp.kirusmile.dao.inter.CitaMedicaDAO;
 import pe.edu.pucp.kirusmile.dbmanager.DBManager;
 import pe.edu.pucp.kirusmile.models.CitaMedica;
+import pe.edu.pucp.kirusmile.models.Empleado;
+import pe.edu.pucp.kirusmile.models.Especialidad;
 import pe.edu.pucp.kirusmile.models.EstadoCita;
 import pe.edu.pucp.kirusmile.models.Medico;
 import pe.edu.pucp.kirusmile.models.Paciente;
+import pe.edu.pucp.kirusmile.models.Persona;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -107,14 +110,16 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
     @Override
     public CitaMedica load(int id) {
         CitaMedica cita = null;
-        String sql = "SELECT c.*, p.nombres AS p_nombres, p.apellido_paterno AS p_ap, p.apellido_materno AS p_am, " +
-                "per_m.nombres AS m_nombres, per_m.apellido_paterno AS m_ap " +
+        String sql = "SELECT c.*, p.nombres AS p_nombres, p.apellido_paterno AS p_ap, p.apellido_materno AS p_am, p.dni AS p_dni, " +
+                "per_m.nombres AS m_nombres, per_m.apellido_paterno AS m_ap, " +
+                "e.nombre_especialidad AS m_esp " +
                 "FROM CitaMedica c " +
                 "INNER JOIN Paciente pac ON c.fid_paciente = pac.id_paciente " +
                 "INNER JOIN Persona p ON pac.fid_persona = p.id_persona " +
                 "INNER JOIN Medico m ON c.fid_medico = m.id_medico " +
                 "INNER JOIN Empleado emp ON m.fid_empleado = emp.id_empleado " +
                 "INNER JOIN Persona per_m ON emp.fid_persona = per_m.id_persona " +
+                "LEFT JOIN Especialidad e ON m.fid_especialidad = e.id_especialidad " +
                 "WHERE c.id_cita_medica = ? AND c.activo = 1";
 
         try (Connection con = DBManager.getInstance().getConnection();
@@ -146,14 +151,34 @@ public class CitaMedicaDAOImpl implements CitaMedicaDAO {
                     p.setNombres(rs.getString("p_nombres"));
                     p.setApellidoPaterno(rs.getString("p_ap"));
                     p.setApellidoMaterno(rs.getString("p_am"));
+                    p.setDni(rs.getString("p_dni"));
                     cita.setPaciente(p);
 
                     // Ensamblaje Médico
                     Medico m = new Medico();
                     m.setIdMedico(rs.getInt("fid_medico"));
+                    
+                    Persona personaMedico = new Persona();
+                    personaMedico.setNombres(rs.getString("m_nombres"));
+                    personaMedico.setApellidoPaterno(rs.getString("m_ap"));
+                    m.setPersona(personaMedico);
+                    
                     m.setNombres(rs.getString("m_nombres"));
                     m.setApellidoPaterno(rs.getString("m_ap"));
+                    
+                    Especialidad esp = new Especialidad();
+                    esp.setNombreEspecialidad(rs.getString("m_esp"));
+                    m.setEspecialidad(esp);
+                    
                     cita.setMedicoAsignado(m);
+
+                    // Ensamblaje Empleado
+                    int idEmpleado = rs.getInt("fid_empleado");
+                    if (!rs.wasNull()) {
+                        Empleado emp = new Empleado();
+                        emp.setIdEmpleado(idEmpleado);
+                        cita.setEmpleado(emp);
+                    }
                 }
             }
         } catch (SQLException e) { System.err.println("Error load: " + e.getMessage()); }

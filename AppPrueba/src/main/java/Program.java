@@ -66,8 +66,8 @@ public class Program {
         nuevaCita.setMedicoAsignado(medicoPrueba);
         nuevaCita.setEmpleado(usuarioLogueado); // Quien la registró
         nuevaCita.setFecha(LocalDate.now().plusDays(2)); // Cita para pasado mañana
-        nuevaCita.setHoraInicio(LocalTime.of(10, 0));    // De 10:00 AM
-        nuevaCita.setHoraFin(LocalTime.of(11, 0));       // a 11:00 AM
+        nuevaCita.setHoraInicio(LocalTime.of(10, 0)); // De 10:00 AM
+        nuevaCita.setHoraFin(LocalTime.of(11, 0)); // a 11:00 AM
         nuevaCita.setMotivoAgendamiento("Dolor de muela del juicio");
 
         int idCitaGenerada = citaBL.registrar(nuevaCita);
@@ -80,7 +80,8 @@ public class Program {
         // EJEMPLO 4: EL DIRECTOR DE ORQUESTA (Ensamblaje del Historial)
         // ---------------------------------------------------------
         System.out.println("\n4. Probando Ensamblaje de Historial Clínico...");
-        // Asumiendo que el paciente que creamos generó el ID 1 o buscamos uno que ya exista
+        // Asumiendo que el paciente que creamos generó el ID 1 o buscamos uno que ya
+        // exista
         HistorialMedico historial = historialBL.obtenerPorIdPaciente(idPacienteGenerado);
 
         if (historial != null) {
@@ -106,6 +107,5 @@ public class Program {
 
         System.out.println("\n=== PRUEBAS FINALIZADAS ===");
     }
-
 
 }

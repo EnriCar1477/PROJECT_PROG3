@@ -111,6 +111,12 @@ public class MedicoBLImpl implements IMedicoBL {
         return medicoDAO.listALL();
     }
 
+    @Override
+    public List<Medico> listarMedicosDatosBasicos() {
+        return medicoDAO.listarMedicosDatosBasicos();
+    }
+
+
     // --- MÉTODOS PRIVADOS DE REGLAS DE NEGOCIO ---
     /**
      * Valida que el médico tenga sus credenciales legales en regla antes de trabajar en la clínica.
