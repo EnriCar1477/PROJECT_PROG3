@@ -28,7 +28,15 @@ public class CitaMedicaBLImpl implements ICitaMedicaBL {
         }
 
         cita.setEstado(EstadoCita.PROGRAMADA);
-        cita.setMonto(0.0);
+        if (cita.getMonto() == 0.0) {
+            pe.edu.pucp.kirusmile.dao.inter.MedicoDAO medicoDAO = new pe.edu.pucp.kirusmile.dao.impl.MedicoDAOImpl();
+            pe.edu.pucp.kirusmile.models.Medico medico = medicoDAO.load(cita.getMedicoAsignado().getIdMedico());
+            if (medico != null && medico.getEspecialidad() != null) {
+                cita.setMonto(medico.getEspecialidad().getCostoEspecialidad());
+            } else {
+                cita.setMonto(0.0);
+            }
+        }
         cita.setActivo(true); // Aseguramos que nace activa
 
         return citaDAO.save(cita);
